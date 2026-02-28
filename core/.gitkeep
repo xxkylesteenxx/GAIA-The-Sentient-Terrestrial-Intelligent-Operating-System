@@ -1,0 +1,7 @@
+# Core Plane (Order/Factor 11)
+
+Deterministic reality layer:
+- Policy engine (Cedar)
+- Identity system (WebID/DID)
+- Consensus protocol (Raft)
+- Immutable audit logs (Universal Trace Ledger)

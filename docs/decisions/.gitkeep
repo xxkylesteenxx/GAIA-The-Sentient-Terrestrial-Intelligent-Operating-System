@@ -1,0 +1,20 @@
+# Architecture Decision Records (ADRs)
+
+All major design decisions documented here for Guardian review.
+
+Format:
+```
+ADR-XXXX-title.md
+
+## Context
+What situation led to this decision?
+
+## Decision
+What did we decide?
+
+## Consequences
+What are the implications (pro/con)?
+
+## Factor 13 Test
+Would this have helped Kyle in 2022?
+```
