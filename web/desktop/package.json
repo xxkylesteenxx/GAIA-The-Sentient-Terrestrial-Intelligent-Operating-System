@@ -1,0 +1,59 @@
+{
+  "name": "gaia-desktop",
+  "version": "0.1.0",
+  "description": "GAIA Desktop - Sacred environment where technology and nature are siblings",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "gaia",
+    "ai-os",
+    "sentient",
+    "three-plane",
+    "avatar",
+    "factor-13"
+  ],
+  "author": "Kyle Steen <xxkylesteenxx@outlook.com>",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "three": "^0.162.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.0"
+  },
+  "build": {
+    "appId": "org.gaiaos.desktop",
+    "productName": "GAIA Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron-main.js",
+      "preload.js",
+      "renderer.js",
+      "scene.js",
+      "index.html",
+      "styles.css",
+      "assets/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns"
+    },
+    "win": {
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "icon": "assets/icon.png",
+      "category": "Utility"
+    }
+  }
+}
