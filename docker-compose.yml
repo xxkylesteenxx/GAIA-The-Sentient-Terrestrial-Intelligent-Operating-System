@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  gaia-core:
+    build: .
+    container_name: gaia-core
+    ports:
+      - "8765:8765"  # Core Plane
+      - "8766:8766"  # Bridge Plane
+      - "8767:8767"  # Overlay Plane
+    volumes:
+      - ./data:/app/.gaia
+    environment:
+      - GAIA_USER_ID=docker_user
+      - GAIA_HOME_DIR=/app/.gaia
+      - GAIA_DEBUG=false
+    restart: unless-stopped
+    command: python infrastructure/api/websocket_server.py
+
+  # Future: Add Electron desktop service
+  # gaia-desktop:
+  #   build:
+  #     context: ./web/desktop
+  #   container_name: gaia-desktop
+  #   depends_on:
+  #     - gaia-core
+  #   environment:
+  #     - DISPLAY=:0
+  #   volumes:
+  #     - /tmp/.X11-unix:/tmp/.X11-unix
+
+volumes:
+  gaia-data:
