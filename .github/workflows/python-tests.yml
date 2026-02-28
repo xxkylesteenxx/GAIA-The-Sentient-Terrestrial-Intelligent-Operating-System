@@ -1,0 +1,49 @@
+name: GAIA Tests
+
+on:
+  push:
+    branches: [ main, develop, phase1-* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run tests with pytest
+      run: |
+        pytest tests/ -v --cov=core --cov=overlay --cov=bridge --cov=infrastructure --cov-report=term-missing
+    
+    - name: Test Z-score calculator standalone
+      run: |
+        python core/zscore/calculator.py
+    
+    - name: Test crisis detector standalone
+      run: |
+        python core/safety/crisis_detector.py
+    
+    - name: Test equilibrium tracker standalone
+      run: |
+        python overlay/equilibrium/tracker.py
+    
+    - name: Lint with ruff (optional)
+      run: |
+        pip install ruff
+        ruff check . --select E,F,W || true
+      continue-on-error: true
