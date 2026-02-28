@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  gaia-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gaia-core
+    ports:
+      - "8765:8765"  # WebSocket API
+      - "8766:8766"  # HTTP API (future)
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - GAIA_ENV=development
+      - GAIA_LOG_LEVEL=INFO
+      - GAIA_WS_HOST=0.0.0.0
+      - GAIA_WS_PORT=8765
+    env_file:
+      - .env
+    networks:
+      - gaia-network
+    restart: unless-stopped
+  
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.12
+    container_name: gaia-etcd
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    environment:
+      - ETCD_NAME=gaia-node1
+      - ETCD_INITIAL_CLUSTER=gaia-node1=http://etcd:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+    volumes:
+      - etcd-data:/etcd-data
+    networks:
+      - gaia-network
+    restart: unless-stopped
+  
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: gaia-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - gaia-network
+    restart: unless-stopped
+
+networks:
+  gaia-network:
+    driver: bridge
+
+volumes:
+  etcd-data:
+  chroma-data:

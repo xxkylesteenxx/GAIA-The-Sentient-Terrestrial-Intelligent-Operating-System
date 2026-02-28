@@ -1,36 +1,34 @@
 # GAIA Core Dependencies
-# Python 3.11+ required
+# Phase 1 Build - Updated 2026-02-28
 
-# Biosignal Processing
+# WebSocket API
+websockets>=12.0
+aiohttp>=3.9.0
+
+# Scientific Computing (Z-score calculation)
 numpy>=1.24.0
-scipy>=1.10.0
+scipy>=1.11.0
 
-# Avatar & Memory
-chromadb>=0.4.0
-sentence-transformers>=2.2.0
+# Avatar & LLM Integration
+openai>=1.0.0
+anthropicsdk>=0.18.0
+chromadb>=0.4.22
 
-# Cryptography
+# Astrology (natal charts)
+kerykeion>=4.0.0
+swisseph>=2.10.0
+
+# Cryptography (memory encryption)
 cryptography>=41.0.0
 
-# Astrology
-kerykeion>=4.0.0
+# Configuration
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
 
-# CLI
-click>=8.1.0
-rich>=13.0.0
-
-# Web Interface (future)
-# fastapi>=0.100.0
-# uvicorn>=0.23.0
-
-# Video Memory (future - Phase 3)
-# opencv-python>=4.8.0
-# deepface>=0.0.79
-
-# Quantum Backend (future - 2030+)
-# qiskit>=0.44.0
-# qiskit-aer>=0.12.0
-
-# Neuromorphic Backend (future - 2032+)
-# nengo>=3.2.0
-# nengo-loihi>=1.1.0
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
