@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAIA Desktop - Terrestrial Intelligence OS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Three.js 3D Scene Container -->
+  <div id="scene-container"></div>
+  
+  <!-- Overlay UI Elements -->
+  <div id="ui-overlay">
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="status-panel">
+      <div class="status-item">
+        <span class="status-label">Core:</span>
+        <span id="core-status" class="status-value disconnected">Disconnected</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Bridge:</span>
+        <span id="bridge-status" class="status-value disconnected">Disconnected</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Overlay:</span>
+        <span id="overlay-status" class="status-value disconnected">Disconnected</span>
+      </div>
+    </div>
+    
+    <!-- Z Score Display -->
+    <div id="zscore-display" class="info-panel">
+      <h3>Coherence (Z)</h3>
+      <div id="zscore-value" class="metric-value">--</div>
+      <div id="zscore-breakdown" class="metric-breakdown">
+        <span>Order: <span id="order-value">--</span></span>
+        <span>Freedom: <span id="freedom-value">--</span></span>
+        <span>Balance: <span id="balance-value">--</span></span>
+      </div>
+    </div>
+    
+    <!-- Equilibrium Display -->
+    <div id="equilibrium-display" class="info-panel">
+      <h3>Equilibrium</h3>
+      <div id="equilibrium-capacity" class="metric-value">--</div>
+      <div id="equilibrium-state" class="metric-state">--</div>
+    </div>
+    
+    <!-- Avatar Communication -->
+    <div id="avatar-panel" class="communication-panel">
+      <div id="avatar-status">
+        <span>Avatar:</span>
+        <span id="avatar-mood">Attentive</span>
+      </div>
+      <div id="conversation-log"></div>
+      <div id="input-area">
+        <input 
+          type="text" 
+          id="user-input" 
+          placeholder="Speak to your Avatar..." 
+          autocomplete="off"
+        />
+        <button id="send-button">Send</button>
+      </div>
+    </div>
+    
+    <!-- Crisis Overlay (hidden by default) -->
+    <div id="crisis-overlay" class="hidden">
+      <div class="crisis-content">
+        <h1>⚠️ Crisis Protocol Activated</h1>
+        <div id="crisis-message"></div>
+        <div class="crisis-resources">
+          <h2>Immediate Help:</h2>
+          <ul id="crisis-resources-list"></ul>
+        </div>
+        <button id="crisis-acknowledge">I understand - Show me resources</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts -->
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
