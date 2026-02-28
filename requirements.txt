@@ -1,27 +1,36 @@
-# GAIA Dependencies (Phase 1 - Avatar MVP)
+# GAIA Core Dependencies
+# Python 3.11+ required
 
-# Core frameworks
-click>=8.1.0  # CLI interface
-python-dotenv>=1.0.0  # Environment management
+# Biosignal Processing
+numpy>=1.24.0
+scipy>=1.10.0
 
-# Avatar intelligence
-sentence-transformers>=2.3.0  # Semantic embeddings
-chromadb>=0.4.0  # Vector database (local-first)
+# Avatar & Memory
+chromadb>=0.4.0
+sentence-transformers>=2.2.0
 
-# Astrological integration (Week 2)
-kerykeion>=4.0.0  # Natal chart calculations (NASA JPL ephemeris)
+# Cryptography
+cryptography>=41.0.0
 
-# Crisis detection (Week 3)
-transformers>=4.36.0  # Sentiment analysis
-torch>=2.1.0  # PyTorch backend
+# Astrology
+kerykeion>=4.0.0
 
-# Development tools
-pytest>=7.4.0
-black>=23.12.0
-mypy>=1.8.0
-ruff>=0.1.0
+# CLI
+click>=8.1.0
+rich>=13.0.0
 
-# Future dependencies (Phase 2+)
-# bovine>=0.1.0  # ActivityPub federation
-# matrix-nio>=0.24.0  # Matrix protocol
-# cedar-py  # Policy engine (when available)
+# Web Interface (future)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+
+# Video Memory (future - Phase 3)
+# opencv-python>=4.8.0
+# deepface>=0.0.79
+
+# Quantum Backend (future - 2030+)
+# qiskit>=0.44.0
+# qiskit-aer>=0.12.0
+
+# Neuromorphic Backend (future - 2032+)
+# nengo>=3.2.0
+# nengo-loihi>=1.1.0
