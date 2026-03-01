@@ -1,0 +1,70 @@
+# GAIA Pre-Commit Hooks
+# Install: pre-commit install
+# Run: pre-commit run --all-files
+
+repos:
+  # Ruff - Modern Python linter (replaces flake8 + isort + pylint)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        name: ruff (lint + auto-fix)
+
+  # Black - Code formatter
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        name: black (format)
+        args: [--line-length=100]
+
+  # Mypy - Static type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        name: mypy (type check)
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports, --check-untyped-defs]
+        # Only check core modules (strict typing)
+        files: ^(core|bridge|overlay)/.*\.py$
+
+  # Pytest - Fast unit tests (skip slow integration tests)
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: pytest (fast tests)
+        entry: pytest
+        language: system
+        args: [-m, "not slow", --tb=short, -q]
+        pass_filenames: false
+        always_run: true
+
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: trim trailing whitespace
+      - id: end-of-file-fixer
+        name: ensure newline at EOF
+      - id: check-yaml
+        name: check yaml syntax
+      - id: check-json
+        name: check json syntax
+      - id: check-toml
+        name: check toml syntax
+      - id: check-added-large-files
+        name: prevent large files
+        args: [--maxkb=1000]
+      - id: check-merge-conflict
+        name: check for merge conflicts
+      - id: debug-statements
+        name: check for debug statements
+
+# CI configuration (skip slow hooks in CI)
+ci:
+  autofix_commit_msg: "chore: pre-commit auto-fixes"
+  autofix_prs: true
+  autoupdate_commit_msg: "chore: pre-commit autoupdate"
