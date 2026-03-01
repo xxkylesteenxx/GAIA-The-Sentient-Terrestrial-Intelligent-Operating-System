@@ -1,0 +1,159 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gaia"
+version = "0.1.0"
+description = "GAIA - Sentient Terrestrial Intelligent Operating System"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Kyle Steen", email = "xxkylesteenxx@outlook.com"},
+]
+keywords = [
+    "consciousness", "biosignals", "z-score", "avatar", 
+    "crisis-detection", "viriditas", "hermetic-principles"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+Homepage = "https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System"
+Documentation = "https://xxkylesteenxx.github.io/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System/"
+Repository = "https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System"
+Issues = "https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System/issues"
+
+# ===========================================================================
+# Black - Code Formatter
+# ===========================================================================
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+skip-string-normalization = false
+extend-exclude = '''
+/(
+  # Exclude generated or vendored code
+  | venv
+  | \.venv
+  | build
+  | dist
+  | \.eggs
+  | \.git
+  | __pycache__
+)/
+'''
+
+# ===========================================================================
+# Ruff - Modern Linter (replaces flake8 + isort + pylint)
+# ===========================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+# Enable rules:
+# E: pycodestyle errors
+# F: pyflakes
+# I: isort (import sorting)
+# N: pep8-naming
+# W: pycodestyle warnings
+# UP: pyupgrade (modern Python syntax)
+# B: flake8-bugbear (common bugs)
+# C4: flake8-comprehensions
+# SIM: flake8-simplify
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+
+# Ignore specific rules:
+# E501: line too long (handled by black)
+# N803: argument name should be lowercase (conflicts with Factor naming)
+ignore = ["E501", "N803"]
+
+[tool.ruff.per-file-ignores]
+# Allow unused imports in __init__.py (re-exports)
+"__init__.py" = ["F401"]
+# Allow star imports in test files
+"tests/*" = ["F403", "F405"]
+
+[tool.ruff.isort]
+# Import order: standard library, third-party, first-party
+known-first-party = ["core", "bridge", "overlay", "infrastructure"]
+
+# ===========================================================================
+# Mypy - Static Type Checker
+# ===========================================================================
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Gradual typing (strict in core, relaxed in overlay)
+ignore_missing_imports = true  # Third-party libs without stubs
+show_error_codes = true
+pretty = true
+
+# Strict type checking for core modules
+[[tool.mypy.overrides]]
+module = "core.*"
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# ===========================================================================
+# Pytest - Testing Framework
+# ===========================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=core",
+    "--cov=overlay",
+    "--cov=bridge",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "-ra",
+]
+
+# Markers for test categorization
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: fast unit tests (run in pre-commit)",
+    "integration: integration tests (require services)",
+    "e2e: end-to-end tests (full system)",
+    "wip: work in progress (skip in CI)",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["core", "bridge", "overlay", "infrastructure"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
