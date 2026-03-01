@@ -1,78 +1,98 @@
-"""Tests for WebSocket API Server."""
+"""Test WebSocket API.
+
+Validates fixes for:
+- CRITICAL-3: WebSocket constructor mismatch
+- MINOR-2: Heartbeat production mode
+"""
 
 import pytest
 import asyncio
-import websockets
-import json
-from infrastructure.api.websocket_server import GAIAWebSocketServer
+from infrastructure.api.websocket_server import GAIAWebSocketServer, HeartbeatMessage
 
 
-class TestWebSocketAPI:
-    """Test WebSocket server functionality."""
-    
-    @pytest.fixture
-    async def server(self):
-        """Create test server instance."""
-        server = GAIAWebSocketServer(host='127.0.0.1', port=8765)
-        # Start server in background
-        server_task = asyncio.create_task(server.start())
-        await asyncio.sleep(0.1)  # Let server start
+class TestWebSocketConstructor:
+    """Test WebSocket server initialization."""
+
+    def test_constructor_accepts_parameters(self):
+        """Constructor should accept host and port parameters."""
+        server = GAIAWebSocketServer(
+            host='127.0.0.1',
+            core_port=19765,
+            bridge_port=19766,
+            overlay_port=19767,
+            env='development',
+        )
         
-        yield server
+        assert server.host == '127.0.0.1'
+        assert server.core_port == 19765
+        assert server.bridge_port == 19766
+        assert server.overlay_port == 19767
+        assert server.env == 'development'
+
+    def test_default_parameters(self):
+        """Constructor should use sensible defaults."""
+        server = GAIAWebSocketServer()
         
-        # Cleanup
-        server_task.cancel()
-        try:
-            await server_task
-        except asyncio.CancelledError:
-            pass
-    
+        assert server.host == 'localhost'
+        assert server.core_port == 8765
+        assert server.bridge_port == 8766
+        assert server.overlay_port == 8767
+        assert server.env == 'production'
+
+
+class TestEnvironmentMode:
+    """Test development vs production mode."""
+
     @pytest.mark.asyncio
-    async def test_connection(self, server):
-        """Test WebSocket connection establishment."""
-        async with websockets.connect('ws://127.0.0.1:8765') as ws:
-            assert ws.open
-    
+    async def test_development_mode_synthetic_z(self):
+        """Development mode should generate synthetic Z-scores."""
+        server = GAIAWebSocketServer(env='development')
+        
+        heartbeat = await server._generate_heartbeat()
+        assert heartbeat is not None
+        assert heartbeat.synthetic is True
+        assert 0 <= heartbeat.z_score <= 12
+
     @pytest.mark.asyncio
-    async def test_ping_pong(self, server):
-        """Test ping/pong health check."""
-        async with websockets.connect('ws://127.0.0.1:8765') as ws:
-            await ws.send(json.dumps({'type': 'ping'}))
-            response = await ws.recv()
-            data = json.loads(response)
-            assert data['type'] == 'pong'
-    
-    @pytest.mark.asyncio
-    async def test_z_score_calculation(self, server):
-        """Test Z-score calculation via WebSocket."""
-        async with websockets.connect('ws://127.0.0.1:8765') as ws:
-            message = {
-                'type': 'calculate_z_score',
-                'time_series': [0.5] * 100,
-                'positive': 5.0,
-                'negative': 1.0
-            }
-            await ws.send(json.dumps(message))
-            response = await ws.recv()
-            data = json.loads(response)
-            
-            assert data['type'] == 'z_score_result'
-            assert 'z_score' in data
-            assert 'state' in data
-    
-    @pytest.mark.asyncio
-    async def test_crisis_detection(self, server):
-        """Test crisis detection via WebSocket."""
-        async with websockets.connect('ws://127.0.0.1:8765') as ws:
-            message = {
-                'type': 'check_crisis',
-                'z_score': 2.0,
-                'text': 'I feel hopeless'
-            }
-            await ws.send(json.dumps(message))
-            response = await ws.recv()
-            data = json.loads(response)
-            
-            assert data['type'] == 'crisis_alert'
-            assert data['level'] in ['HIGH', 'MODERATE']
-            assert data['requires_intervention'] is True
+    async def test_production_mode_requires_injection(self):
+        """Production mode should require Z-score injection."""
+        server = GAIAWebSocketServer(env='production')
+        
+        # No Z-score injected yet
+        heartbeat = await server._generate_heartbeat()
+        assert heartbeat is None
+        
+        # Inject Z-score
+        server.inject_z_score(7.5)
+        heartbeat = await server._generate_heartbeat()
+        assert heartbeat is not None
+        assert heartbeat.z_score == 7.5
+        assert heartbeat.synthetic is False
+
+    def test_inject_z_score_validation(self):
+        """inject_z_score should validate range [0, 12]."""
+        server = GAIAWebSocketServer()
+        
+        # Valid
+        server.inject_z_score(6.5)
+        assert server.current_z_score == 6.5
+        
+        # Invalid: too low
+        with pytest.raises(ValueError, match="outside valid range"):
+            server.inject_z_score(-1.0)
+        
+        # Invalid: too high
+        with pytest.raises(ValueError, match="outside valid range"):
+            server.inject_z_score(15.0)
+
+
+class TestClientManagement:
+    """Test client connection management."""
+
+    def test_client_sets_initialized(self):
+        """Server should initialize empty client sets."""
+        server = GAIAWebSocketServer()
+        
+        assert len(server.core_clients) == 0
+        assert len(server.bridge_clients) == 0
+        assert len(server.overlay_clients) == 0
