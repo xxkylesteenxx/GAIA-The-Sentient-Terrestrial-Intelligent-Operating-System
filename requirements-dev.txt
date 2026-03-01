@@ -1,31 +1,32 @@
-# GAIA Development Dependencies
-# Generated: 2026-02-28
-#
-# Install development environment:
-#   pip install -r requirements.txt -r requirements-dev.txt
-#
-# These tools are used by CI/CD (.github/workflows/ci.yml)
-# but are not required for production deployment.
+# GAIA Development & Testing Requirements
+# Install with: pip install -r requirements.txt -r requirements-dev.txt
+
+-r requirements.txt
 
 # ===========================================================================
-# Testing Framework
+# Testing
 # ===========================================================================
-
 pytest>=7.4.0              # Test framework
-pytest-asyncio>=0.21.0     # Async test support (for WebSocket tests)
+pytest-asyncio>=0.21.0     # Async test support (WebSocket tests)
 pytest-cov>=4.1.0          # Coverage reporting (codecov integration)
+pytest-mock>=3.11.0        # Mocking framework (fixtures, patches)
 
 # ===========================================================================
-# Code Quality Tools
+# Code Quality
 # ===========================================================================
+ruff>=0.1.0                # Modern linter (replaces flake8, 10-100x faster)
+black>=23.0.0              # Code formatter (PEP 8)
+mypy>=1.5.0                # Static type checker
+pre-commit>=3.4.0          # Git hooks (auto-format, lint on commit)
 
-black~=23.0                # Code formatter (PEP 8)
-flake8~=6.0                # Linter, style checker
-mypy~=1.5                  # Static type checker
+# ===========================================================================
+# Documentation
+# ===========================================================================
+mkdocs>=1.5.0              # Documentation site generator
+mkdocs-material>=9.2.0     # Material Design theme
 
 # ===========================================================================
 # Development Utilities
 # ===========================================================================
-
 ipython>=8.10.0            # Enhanced Python REPL
 ipdb>=0.13.0               # IPython debugger (breakpoint())
