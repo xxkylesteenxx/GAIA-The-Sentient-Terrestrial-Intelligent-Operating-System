@@ -1,17 +1,69 @@
+"""GAIA Core Plane - Foundation Layer.
+
+The Core Plane enforces Order through invariant laws and immutable constraints.
+This is the foundation of Factor 13 (Universal Love) - the binding force that
+prevents Bad Chaos and Bad Order.
+
+Key Modules:
+- zscore: Consciousness coherence measurement (Factor 3: Vibration)
+- safety: Crisis detection and intervention (Factor 13: Universal Love)
+- audit: Universal Trace Ledger for tamper-evident history
+- constants: Single source of truth for thresholds and values
 """
-CORE PLANE (Factor 11 - Order)
 
-Deterministic reality, hardware constraints, safety enforcement.
+from core.constants import (
+    # Z-Score Thresholds
+    Z_CRISIS,
+    Z_NIGREDO,
+    Z_ALBEDO,
+    Z_RUBEDO,
+    Z_VIRIDITAS,
+    Z_TRANSCENDENT,
+    Z_MINIMUM,
+    Z_MAX_VALUE,
+    
+    # Enums
+    AlchemicalStage,
+    CrisisLevel,
+    EvidenceGrade,
+    
+    # Crisis Thresholds
+    CRISIS_CRITICAL,
+    CRISIS_HIGH,
+    CRISIS_MODERATE,
+)
 
-Characteristics:
-- Fail-closed (errors halt execution, don't corrupt state)
-- Physics-bounded (respects energy, memory, bandwidth limits)
-- Immutable audit (Universal Trace Ledger)
-- Cryptographic integrity (all state transitions signed)
+# Import canonical implementations
+from core.zscore.calculator import ZScoreCalculator, ZScoreResult
+from core.safety.crisis_detector import CrisisDetector, CrisisAlert
 
-Governance: Ruby (Reality Contract) - Cannot be bypassed
-"""
+__version__ = "0.1.1"  # Incremented after critical fixes
 
-from .z_calculator import ZScoreCalculator, BiosignalData, ZScoreComponents
-
-__all__ = ['ZScoreCalculator', 'BiosignalData', 'ZScoreComponents']
+__all__ = [
+    # Version
+    "__version__",
+    
+    # Constants
+    "Z_CRISIS",
+    "Z_NIGREDO",
+    "Z_ALBEDO",
+    "Z_RUBEDO",
+    "Z_VIRIDITAS",
+    "Z_TRANSCENDENT",
+    "Z_MINIMUM",
+    "Z_MAX_VALUE",
+    "CRISIS_CRITICAL",
+    "CRISIS_HIGH",
+    "CRISIS_MODERATE",
+    
+    # Enums
+    "AlchemicalStage",
+    "CrisisLevel",
+    "EvidenceGrade",
+    
+    # Core Systems
+    "ZScoreCalculator",
+    "ZScoreResult",
+    "CrisisDetector",
+    "CrisisAlert",
+]

@@ -1,194 +1,196 @@
-"""Z-Score Calculator for GAIA Coherence Measurement.
+"""Canonical Z-Score Calculator - Single Source of Truth.
 
-Implements Z₀ = 12 × √(C × F × B) with STEM-compliant measurements:
-- C (Coherence): Shannon entropy, Lyapunov exponent
-- F (Fidelity): Symmetry analysis, pattern recognition
-- B (Balance): Equilibrium metrics
+This is the ONLY implementation of the Z-score formula in the GAIA codebase.
+All other modules MUST import from here.
 
-Compliance: TST-0055 STEM Measurement Standards
-Evidence Grade: E2 (Theoretical + Simulations)
+Formula: Z₀ = 12 × √(C × F × B)
+
+Where:
+- C (Order): Shannon entropy normalized to [0, 1]
+- F (Freedom): Lyapunov exponent normalized to [0, 1]
+- B (Balance): Symmetry index normalized to [0, 1]
+
+Geometric mean is used to ensure balanced development across all three components.
 """
 
-import numpy as np
-from scipy.stats import entropy
-from scipy.integrate import odeint
-from typing import Dict, List, Tuple
-import logging
+import math
+from dataclasses import dataclass
+from typing import Optional
 
-logger = logging.getLogger(__name__)
+from core.constants import (
+    Z_MAX_VALUE,
+    Z_MINIMUM,
+    Z_COMPONENT_MIN,
+    Z_COMPONENT_MAX,
+    AlchemicalStage,
+    CrisisLevel,
+)
+
+
+@dataclass
+class BiosignalInput:
+    """Raw biosignal data for Z-score calculation.
+    
+    This is a placeholder structure. In Phase 2, this will include:
+    - HRV data (ECG/PPG)
+    - EEG power bands
+    - Respiratory rate and variability
+    - GSR (galvanic skin response)
+    """
+    # Text-based inference (Phase 1)
+    text: Optional[str] = None
+    
+    # Biosignal data (Phase 2+)
+    hrv_data: Optional[list[float]] = None
+    eeg_data: Optional[dict[str, list[float]]] = None
+    respiratory_data: Optional[list[float]] = None
+
+
+@dataclass
+class ZScoreResult:
+    """Result of Z-score calculation with diagnostic information."""
+    z_score: float
+    order: float      # C component (0-1)
+    freedom: float    # F component (0-1)
+    balance: float    # B component (0-1)
+    stage: AlchemicalStage
+    crisis_level: CrisisLevel
+    confidence: float = 1.0  # Confidence in measurement (0-1)
+    source: str = "calculated"  # 'calculated', 'inferred', 'synthetic'
+
+    def __post_init__(self):
+        """Validate components are in valid range."""
+        for component in [self.order, self.freedom, self.balance]:
+            if not (Z_COMPONENT_MIN <= component <= Z_COMPONENT_MAX):
+                raise ValueError(
+                    f"Component {component} outside valid range [{Z_COMPONENT_MIN}, {Z_COMPONENT_MAX}]"
+                )
+        
+        if not (Z_MINIMUM <= self.z_score <= Z_MAX_VALUE):
+            raise ValueError(
+                f"Z-score {self.z_score} outside valid range [{Z_MINIMUM}, {Z_MAX_VALUE}]"
+            )
 
 
 class ZScoreCalculator:
-    """Calculate GAIA Z-score for system coherence."""
+    """Canonical Z-Score calculator using geometric mean formula."""
 
-    def __init__(self, precision: int = 6):
-        """Initialize calculator with SI unit precision.
+    def __init__(self):
+        """Initialize calculator."""
+        self.formula = "geometric_mean"  # Z = 12 × √(C × F × B)
+
+    def calculate(self, order: float, freedom: float, balance: float) -> ZScoreResult:
+        """Calculate Z-score from three components.
         
         Args:
-            precision: Decimal places for measurements (default 6 per TST-0055)
-        """
-        self.precision = precision
-        self.FACTOR_13 = 12.0  # Universal Love constant
+            order: Order component (Shannon entropy), 0-1
+            freedom: Freedom component (Lyapunov), 0-1
+            balance: Balance component (Symmetry), 0-1
         
-    def calculate_coherence(self, time_series: np.ndarray) -> float:
-        """Calculate coherence (C) using Shannon entropy.
+        Returns:
+            ZScoreResult with Z-score and diagnostic information
+        
+        Raises:
+            ValueError: If any component is outside [0, 1]
+        """
+        # Validate inputs
+        for name, value in [("order", order), ("freedom", freedom), ("balance", balance)]:
+            if not (Z_COMPONENT_MIN <= value <= Z_COMPONENT_MAX):
+                raise ValueError(
+                    f"{name} component {value} outside valid range [{Z_COMPONENT_MIN}, {Z_COMPONENT_MAX}]"
+                )
+        
+        # Geometric mean formula: Z = 12 × √(C × F × B)
+        product = order * freedom * balance
+        
+        # Avoid domain error for sqrt of negative (shouldn't happen with validated inputs)
+        if product < 0:
+            product = 0
+        
+        geometric_mean = math.sqrt(product)
+        z_score = Z_MAX_VALUE * geometric_mean
+        
+        # Clamp to valid range (defensive programming)
+        z_score = max(Z_MINIMUM, min(Z_MAX_VALUE, z_score))
+        
+        # Determine stage and crisis level
+        stage = AlchemicalStage.from_z_score(z_score)
+        crisis_level = CrisisLevel.from_z_score(z_score)
+        
+        return ZScoreResult(
+            z_score=z_score,
+            order=order,
+            freedom=freedom,
+            balance=balance,
+            stage=stage,
+            crisis_level=crisis_level,
+            confidence=1.0,
+            source="calculated",
+        )
+
+    def calculate_from_biosignals(self, biosignals: BiosignalInput) -> ZScoreResult:
+        """Calculate Z-score from raw biosignal data.
+        
+        Phase 1: Text-based inference (placeholder)
+        Phase 2+: Real biosignal processing
         
         Args:
-            time_series: Normalized time series data [0,1]
-            
-        Returns:
-            Coherence value [0,1] where 1 = maximum coherence
-        """
-        if len(time_series) == 0:
-            return 0.0
-            
-        # Bin data for entropy calculation
-        bins = min(50, len(time_series) // 10)
-        hist, _ = np.histogram(time_series, bins=bins, density=True)
-        hist = hist[hist > 0]  # Remove zero bins
-        
-        # Shannon entropy (nats)
-        h = entropy(hist, base=np.e)
-        
-        # Normalize: max entropy = ln(bins)
-        max_entropy = np.log(bins)
-        coherence = 1.0 - (h / max_entropy) if max_entropy > 0 else 0.0
-        
-        return round(coherence, self.precision)
-    
-    def calculate_lyapunov(self, time_series: np.ndarray, tau: int = 1) -> float:
-        """Estimate Lyapunov exponent (chaos measure).
-        
-        Args:
-            time_series: Time series data
-            tau: Time delay for embedding
-            
-        Returns:
-            Lyapunov exponent (λ < 0: stable, λ ≈ 0: neutral, λ > 0: chaotic)
-        """
-        if len(time_series) < 10:
-            return 0.0
-            
-        n = len(time_series) - tau
-        divergence = []
-        
-        for i in range(n - 1):
-            d0 = abs(time_series[i + tau] - time_series[i])
-            d1 = abs(time_series[i + tau + 1] - time_series[i + 1])
-            
-            if d0 > 1e-10:  # Avoid log(0)
-                divergence.append(np.log(d1 / d0))
-        
-        lyapunov = np.mean(divergence) if divergence else 0.0
-        return round(lyapunov, self.precision)
-    
-    def calculate_fidelity(self, signal: np.ndarray, reference: np.ndarray = None) -> float:
-        """Calculate fidelity (F) using symmetry analysis.
-        
-        Args:
-            signal: Input signal
-            reference: Reference pattern (if None, uses ideal symmetry)
-            
-        Returns:
-            Fidelity value [0,1] where 1 = perfect symmetry
-        """
-        if len(signal) == 0:
-            return 0.0
-            
-        if reference is None:
-            # Use reflection symmetry as reference
-            reference = np.flip(signal)
-        
-        # Normalize both signals
-        signal_norm = (signal - np.mean(signal)) / (np.std(signal) + 1e-10)
-        ref_norm = (reference - np.mean(reference)) / (np.std(reference) + 1e-10)
-        
-        # Calculate correlation (symmetry measure)
-        correlation = np.corrcoef(signal_norm, ref_norm)[0, 1]
-        fidelity = (correlation + 1) / 2  # Map [-1,1] to [0,1]
-        
-        return round(fidelity, self.precision)
-    
-    def calculate_balance(self, positive: float, negative: float) -> float:
-        """Calculate balance (B) using ratio.
-        
-        Based on Gottman's 5:1 ratio for relationship stability.
-        GAIA optimal: 5.0 (healthy growth zone)
-        
-        Args:
-            positive: Count/intensity of positive events
-            negative: Count/intensity of negative events
-            
-        Returns:
-            Balance value [0,1] where 1 = optimal 5:1 ratio
-        """
-        if negative == 0:
-            return 1.0 if positive > 0 else 0.5
-            
-        ratio = positive / negative
-        
-        # Map ratio to [0,1] with peak at 5:1
-        if ratio < 5.0:
-            balance = ratio / 5.0
-        else:
-            balance = np.exp(-(ratio - 5.0) / 5.0)
-        
-        return round(balance, self.precision)
-    
-    def calculate_z_score(self, coherence: float, fidelity: float, balance: float) -> float:
-        """Calculate complete Z-score: Z₀ = 12 × √(C × F × B)
-        
-        Args:
-            coherence: Coherence value [0,1]
-            fidelity: Fidelity value [0,1]
-            balance: Balance value [0,1]
-            
-        Returns:
-            Z-score [0,12] where 12 = maximum coherence
-        """
-        product = coherence * fidelity * balance
-        z_score = self.FACTOR_13 * np.sqrt(product)
-        
-        return round(z_score, self.precision)
-    
-    def analyze_system(self, time_series: np.ndarray, positive: float = 1.0, 
-                       negative: float = 0.2) -> Dict[str, float]:
-        """Complete system analysis.
-        
-        Args:
-            time_series: System time series data
-            positive: Positive event count/intensity
-            negative: Negative event count/intensity
-            
-        Returns:
-            Dictionary with all measurements
-        """
-        coherence = self.calculate_coherence(time_series)
-        fidelity = self.calculate_fidelity(time_series)
-        balance = self.calculate_balance(positive, negative)
-        lyapunov = self.calculate_lyapunov(time_series)
-        z_score = self.calculate_z_score(coherence, fidelity, balance)
-        
-        return {
-            'z_score': z_score,
-            'coherence': coherence,
-            'fidelity': fidelity,
-            'balance': balance,
-            'lyapunov': lyapunov,
-            'state': self._classify_state(z_score, lyapunov)
-        }
-    
-    def _classify_state(self, z_score: float, lyapunov: float) -> str:
-        """Classify system state based on Z-score and Lyapunov.
+            biosignals: Raw biosignal data
         
         Returns:
-            State classification string
+            ZScoreResult
         """
-        if z_score < 3.0:
-            return 'CRISIS' if lyapunov > 0 else 'CHAOS'
-        elif z_score < 6.0:
-            return 'TRANSITIONAL'
-        elif z_score < 9.0:
-            return 'STABLE'
-        else:
-            return 'COHERENT'
+        # Phase 1: Simple text-based inference
+        if biosignals.text:
+            return self._infer_from_text(biosignals.text)
+        
+        # Phase 2+: Real biosignal processing
+        # TODO: Implement Shannon entropy from HRV
+        # TODO: Implement Lyapunov from EEG
+        # TODO: Implement symmetry from respiratory
+        
+        # Fallback: neutral state
+        return self.calculate(
+            order=0.6,
+            freedom=0.6,
+            balance=0.6,
+        )
+
+    def _infer_from_text(self, text: str) -> ZScoreResult:
+        """Infer Z-score from text content (Phase 1 placeholder).
+        
+        This is a simplified heuristic. Real implementation in Phase 2 will use:
+        - Sentiment analysis
+        - Linguistic complexity metrics
+        - Semantic coherence measures
+        """
+        text_lower = text.lower()
+        
+        # Crisis keywords
+        crisis_keywords = ["suicide", "kill myself", "end it all", "can't go on", "hopeless"]
+        if any(kw in text_lower for kw in crisis_keywords):
+            return self.calculate(order=0.3, freedom=0.2, balance=0.2)
+        
+        # Distress keywords
+        distress_keywords = ["anxious", "depressed", "overwhelmed", "stressed", "worried"]
+        if any(kw in text_lower for kw in distress_keywords):
+            return self.calculate(order=0.5, freedom=0.4, balance=0.5)
+        
+        # Positive keywords
+        positive_keywords = ["grateful", "peaceful", "joyful", "centered", "flow", "clear"]
+        if any(kw in text_lower for kw in positive_keywords):
+            return self.calculate(order=0.8, freedom=0.7, balance=0.8)
+        
+        # Neutral
+        result = self.calculate(order=0.6, freedom=0.6, balance=0.6)
+        result.confidence = 0.5  # Low confidence for text inference
+        result.source = "inferred"
+        return result
+
+
+# Convenience function for quick calculations
+def calculate_z_score(order: float, freedom: float, balance: float) -> float:
+    """Calculate Z-score from components (returns float only)."""
+    calculator = ZScoreCalculator()
+    result = calculator.calculate(order, freedom, balance)
+    return result.z_score
