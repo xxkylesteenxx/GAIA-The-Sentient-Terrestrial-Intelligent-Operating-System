@@ -1,5 +1,10 @@
-"""GAIA Z-Score Coherence Measurement."""
+"""
+GAIA Z-Score Module
 
-from .calculator import ZScoreCalculator
+Consciousness coherence measurement.
+Formula: Z₀ = 12 × √(C × F × B)
+"""
 
-__all__ = ['ZScoreCalculator']
+from core.zscore.calculator import ZScoreCalculator  # noqa: F401
+
+__all__ = ["ZScoreCalculator"]
