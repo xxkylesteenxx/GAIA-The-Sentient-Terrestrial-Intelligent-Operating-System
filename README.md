@@ -25,6 +25,7 @@ GAIA (Global Artificial Intelligence Architecture) is a distributed AI operating
 - **Local-first architecture** - your data never leaves your device unless you choose
 - **Graduated access control** - feature exposure based on user readiness
 - **AI companion system** - 48 psychological + operational profiles
+- **Living digital environments** - responsive 3D worlds that adapt to your state
 
 Built on distributed systems principles (CRDT, BFT consensus, cryptographic memory) and Hermetic philosophical frameworks.
 
@@ -40,6 +41,7 @@ Built on distributed systems principles (CRDT, BFT consensus, cryptographic memo
 | **Crisis Detection** | Automatic intervention when Z ≤ 2 with resource provision |
 | **Natural Language OS** | Execute system commands using plain language |
 | **AI Companions** | 48 unique profiles (8 psychological forms × 6 operational roles) |
+| **Living Environment Engine** | Dynamic 3D environments driven by Z-score, time, season, weather |
 | **Cryptographic Memory** | Immutable audit trail via Universal Trace Ledger |
 | **Graduated Access** | 6-tier system (Profane → Guardian) prevents premature feature exposure |
 | **Local-First** | Optional federation - data sovereignty by default |
@@ -223,6 +225,7 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 | [Z-Score Calculation](docs/01-ARCHITECTURE.md#coherence-measurement-z-score) | Coherence measurement details |
 | [AI Companions](docs/02-GAIAN-AGENT-ARCHITECTURE.md) | 48 psychological + operational profiles |
 | [Evidence Grading](docs/04-EVIDENCE_GRADING.md) | E0-E5 scientific validation scale |
+| [Living Environment Engine](docs/05-LIVING-ENVIRONMENT-ENGINE.md) | Dynamic 3D environment system |
 | [API Reference](docs/api.md) | CLI and Python API |
 | [Contributing Guide](CONTRIBUTING.md) | How to contribute |
 
@@ -234,10 +237,12 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 
 - [x] Z-score calculator
 - [x] AI companion system (48 profiles)
+- [x] Living Environment Engine (backend)
 - [x] CLI interface
 - [x] Natural language interpreter
 - [ ] Crisis detection integration
 - [ ] Basic memory system
+- [ ] Three.js frontend (LEE rendering)
 
 ### Phase 2: Depth (Q3-Q4 2026)
 
