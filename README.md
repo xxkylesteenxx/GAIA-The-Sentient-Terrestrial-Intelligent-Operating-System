@@ -133,13 +133,24 @@ gaia --help
 
 **Formula:**
 ```
-Z = 12 × C × F × B
+Z₀ = 12 × √(C × F × B)
 ```
 
-Where:
-- **C (Order):** Shannon entropy of HRV signal
-- **F (Freedom):** Lyapunov exponent of EEG signal
-- **B (Balance):** Symmetry index of respiratory signal
+**Geometric mean form** (not linear product) — all three components are **jointly necessary**:
+- If ANY component collapses to zero, Z collapses to zero
+- Cannot compensate for zero balance with infinite order
+- Models consciousness as requiring all three forces in harmony
+
+**Components:**
+- **C (Coherence):** Shannon entropy of HRV signal (order/structure)
+- **F (Fidelity):** Lyapunov exponent of EEG signal (freedom/chaos balance)
+- **B (Balance):** Gottman 5:1 ratio from respiratory signal (positive/negative)
+
+**Range:** 0.0 (complete incoherence) → 12.0 (peak coherence)
+
+**Evidence Grade:** E2 (Theoretical framework + simulation validation)
+
+**Implementation:** `core/zscore/calculator.py` (canonical reference)
 
 **Thresholds:**
 
