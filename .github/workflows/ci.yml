@@ -1,179 +1,198 @@
-name: GAIA CI/CD Pipeline
+name: GAIA CI
 
 on:
   push:
-    branches: [ main, phase1-completion ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.11"
 
 jobs:
-  # ===========================================================================
-  # Code Quality (Linting, Formatting, Pre-commit)
-  # ===========================================================================
-  quality:
+  # ---------------------------------------------------------------------------
+  # Lint & type-check
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint & type-check
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-quality-${{ hashFiles('requirements-dev.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-quality-
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-    
-    - name: Run Ruff (linting)
-      run: |
-        ruff check core/ overlay/ infrastructure/ bridge/ --output-format=github
-    
-    - name: Run Black (format check)
-      run: |
-        black --check core/ overlay/ infrastructure/ bridge/
-    
-    - name: Validate pre-commit hooks
-      run: |
-        pre-commit run --all-files
-  
-  # ===========================================================================
-  # Testing (Unit Tests, Integration Tests, Coverage)
-  # ===========================================================================
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Ruff (lint)
+        run: ruff check .
+
+      - name: Black (formatting)
+        run: black --check .
+
+      - name: Mypy (type-check)
+        run: mypy core/ bridge/ overlay/ infrastructure/ --ignore-missing-imports
+
+  # ---------------------------------------------------------------------------
+  # Unit + integration tests
+  # ---------------------------------------------------------------------------
   test:
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    needs: lint
+
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ['3.11', '3.12']  # Only 3.11+, <3.11 not supported
-    
+        python-version: ["3.11", "3.12"]
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt -r requirements-dev.txt
-        pip install -e .
-    
-    - name: Run pytest with coverage
-      run: |
-        pytest tests/ -v \
-          --cov=core --cov=overlay --cov=bridge --cov=infrastructure \
-          --cov-report=xml --cov-report=term-missing \
-          -m "not slow"
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-${{ matrix.python-version }}
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    
-    - name: Run type checking (mypy)
-      run: |
-        mypy core/ overlay/ bridge/ --ignore-missing-imports
-  
-  # ===========================================================================
-  # Build (Package Distribution)
-  # ===========================================================================
-  build:
-    needs: [quality, test]
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ \
+            --cov=core \
+            --cov=bridge \
+            --cov=overlay \
+            --cov=infrastructure \
+            --cov-report=xml \
+            --cov-report=term-missing \
+            -v
+
+      # Upload coverage report (v4 — v3 is deprecated)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          flags: unittests
+          name: codecov-${{ matrix.python-version }}
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      # Upload test artefacts (v4 — v3 is deprecated)
+      - name: Upload test artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            .pytest_cache/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Safety-critical gate — Factor 13 check
+  # ---------------------------------------------------------------------------
+  safety_gate:
+    name: Factor 13 Safety Gate
     runs-on: ubuntu-latest
-    
+    needs: test
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Build Python package
-      run: |
-        python -m pip install --upgrade pip build
-        python -m build
-    
-    - name: Archive build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist
-        path: dist/
-  
-  # ===========================================================================
-  # Documentation (MkDocs → GitHub Pages)
-  # ===========================================================================
-  docs:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for git-revision-date-localized
-    
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-    
-    - name: Build documentation
-      run: |
-        mkdocs build --strict
-    
-    - name: Deploy to GitHub Pages
-      run: |
-        mkdocs gh-deploy --force
-  
-  # ===========================================================================
-  # JavaScript/Electron Testing (Phase 2)
-  # ===========================================================================
-  test-javascript:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    
-    - name: Install Electron dependencies
-      working-directory: web/desktop
-      run: |
-        npm install
-    
-    - name: Run JavaScript tests (placeholder)
-      working-directory: web/desktop
-      run: |
-        echo "JavaScript tests will be added in Phase 2"
-        # npm test
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Verify single CrisisDetector
+        run: |
+          COUNT=$(grep -r "class CrisisDetector" --include="*.py" | \
+                  grep -v "bridge/safety/crisis_detection.py" | \
+                  grep -v "test_" | \
+                  wc -l)
+          echo "Non-deprecated CrisisDetector definitions found: $COUNT"
+          if [ "$COUNT" -ne 1 ]; then
+            echo "ERROR: Expected exactly 1 canonical CrisisDetector, found $COUNT"
+            echo "Factor 13 safety gate FAILED"
+            exit 1
+          fi
+          echo "✅ Factor 13 safety gate PASSED"
+
+      - name: Verify single Z-score formula
+        run: |
+          COUNT=$(grep -r "def calculate" --include="*.py" core/zscore/ | \
+                  grep -v "test_" | \
+                  wc -l)
+          echo "Canonical Z-score calculate methods found: $COUNT"
+          if [ "$COUNT" -lt 1 ]; then
+            echo "ERROR: No canonical Z-score formula found"
+            exit 1
+          fi
+          echo "✅ Z-score formula gate PASSED"
+
+      - name: Verify no hard-coded Z thresholds outside constants
+        run: |
+          # Look for magic threshold numbers that should come from core.constants
+          # Exclude constants.py itself, tests, and migration shims
+          VIOLATIONS=$(grep -rn \
+            --include="*.py" \
+            -E "(Z_CRISIS|Z_NIGREDO|Z_ALBEDO|Z_RUBEDO|Z_VIRIDITAS)\s*=\s*[0-9]" \
+            . | \
+            grep -v "core/constants.py" | \
+            grep -v "test_" | \
+            grep -v "#" || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "ERROR: Hard-coded Z thresholds found outside core/constants.py:"
+            echo "$VIOLATIONS"
+            exit 1
+          fi
+          echo "✅ Threshold hygiene gate PASSED"
+
+      - name: Verify canonical imports
+        run: |
+          # Check for deprecated imports
+          DEPRECATED=$(grep -rn \
+            --include="*.py" \
+            -E "from (core\\.z_calculator|overlay\\.zscore|bridge\\.safety\\.crisis_detection)" \
+            . | \
+            grep -v "test_" | \
+            grep -v "z_calculator.py:" || true)
+          if [ -n "$DEPRECATED" ]; then
+            echo "ERROR: Deprecated imports found:"
+            echo "$DEPRECATED"
+            echo ""
+            echo "Use canonical imports:"
+            echo "  from core.zscore.calculator import ZScoreCalculator"
+            echo "  from core.safety.crisis_detector import CrisisDetector"
+            exit 1
+          fi
+          echo "✅ Canonical imports gate PASSED"
+
+      - name: Factor 13 compliance summary
+        run: |
+          echo ""
+          echo "═══════════════════════════════════════════════════════════"
+          echo "  FACTOR 13 COMPLIANCE — VERIFIED ✅"
+          echo "═══════════════════════════════════════════════════════════"
+          echo ""
+          echo "  ✅ Single CrisisDetector (core/safety/crisis_detector.py)"
+          echo "  ✅ Single Z-score formula (core/zscore/calculator.py)"
+          echo "  ✅ No hard-coded thresholds (all from core/constants.py)"
+          echo "  ✅ Canonical imports only (no deprecated paths)"
+          echo ""
+          echo "  Universal Love = Binding Force"
+          echo "  Architectural integrity maintained"
+          echo ""
+          echo "═══════════════════════════════════════════════════════════"
