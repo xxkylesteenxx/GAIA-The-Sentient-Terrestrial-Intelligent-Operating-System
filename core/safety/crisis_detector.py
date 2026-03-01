@@ -1,216 +1,136 @@
-"""Crisis Detection System for GAIA.
+"""Canonical Crisis Detector - Factor 13 Protection.
 
-Monitors Z-score thresholds and keyword patterns to detect:
-- Factor 13 violations (Z < 3.0)
-- Acute crises (imminent harm)
-- Chronic degradation (sustained low coherence)
+This is the ONLY implementation of crisis detection in the GAIA codebase.
+All other modules MUST import from here.
 
-Safety Architecture: Graduated response based on severity
+Factor 13: Universal Love - The binding force that ensures:
+- No Bad Chaos (harm to self or others)
+- No Bad Order (oppression, control)
+- Prosocial cooperation enforced at all scales
 """
 
-import re
-from typing import List, Dict, Tuple
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-import logging
+from typing import Optional
 
-logger = logging.getLogger(__name__)
+from core.constants import (
+    CRISIS_CRITICAL,
+    CRISIS_HIGH,
+    CRISIS_MODERATE,
+    CrisisLevel,
+)
 
 
-class CrisisLevel(Enum):
-    """Crisis severity levels."""
-    NONE = 0
-    LOW = 1
-    MODERATE = 2
-    HIGH = 3
-    CRITICAL = 4
+@dataclass
+class CrisisAlert:
+    """Crisis detection result with intervention guidance."""
+    level: CrisisLevel
+    z_score: float
+    timestamp: datetime
+    message: str
+    intervention_required: bool
+    resources: list[str]
+    
+    def __post_init__(self):
+        """Populate resources based on crisis level."""
+        if self.intervention_required and not self.resources:
+            # Default critical resources
+            self.resources = [
+                "988 Suicide & Crisis Lifeline (US): call or text 988",
+                "Crisis Text Line: Text HOME to 741741",
+                "International Association for Suicide Prevention: https://www.iasp.info/resources/Crisis_Centres/",
+            ]
 
 
 class CrisisDetector:
-    """Detect and classify crisis states."""
-    
-    # Z-score thresholds (Factor 13 = Universal Love)
-    Z_CRITICAL = 1.0   # Omnicide risk
-    Z_HIGH = 3.0       # Severe harm
-    Z_MODERATE = 6.0   # Intervention needed
-    Z_STABLE = 9.0     # Healthy threshold
-    
-    # Crisis keywords by severity
-    CRITICAL_KEYWORDS = [
-        r'\bsuicid[e|al]\b',
-        r'\bkill\s+(myself|self)\b',
-        r'\bend\s+my\s+life\b',
-        r'\bharm\s+(myself|others)\b',
-        r'\bgenocide\b',
-        r'\bomnicide\b'
-    ]
-    
-    HIGH_KEYWORDS = [
-        r'\bdie\b',
-        r'\bdeath\b',
-        r'\bviolence\b',
-        r'\btrauma\b',
-        r'\babuse\b',
-        r'\bhate\b.*\bintense',
-        r'\brage\b',
-        r'\bterror\b'
-    ]
-    
-    MODERATE_KEYWORDS = [
-        r'\bdepressed\b',
-        r'\banxious\b',
-        r'\bhopeless\b',
-        r'\boverwhelmed\b',
-        r'\bstuck\b',
-        r'\blost\b',
-        r'\bconfused\b'
-    ]
-    
+    """Canonical crisis detector using thresholds from core.constants."""
+
     def __init__(self):
-        """Initialize detector with compiled regex patterns."""
-        self.critical_patterns = [re.compile(p, re.IGNORECASE) for p in self.CRITICAL_KEYWORDS]
-        self.high_patterns = [re.compile(p, re.IGNORECASE) for p in self.HIGH_KEYWORDS]
-        self.moderate_patterns = [re.compile(p, re.IGNORECASE) for p in self.MODERATE_KEYWORDS]
-    
-    def detect_from_z_score(self, z_score: float) -> CrisisLevel:
+        """Initialize detector with canonical thresholds."""
+        self.critical_threshold = CRISIS_CRITICAL  # 1.0
+        self.high_threshold = CRISIS_HIGH          # 3.0
+        self.moderate_threshold = CRISIS_MODERATE  # 6.0
+
+    def detect(self, z_score: float) -> CrisisAlert:
         """Detect crisis level from Z-score.
         
         Args:
-            z_score: Current Z-score [0,12]
-            
+            z_score: Current Z coherence score (0-12)
+        
         Returns:
-            CrisisLevel enum
+            CrisisAlert with level, message, and resources
         """
-        if z_score < self.Z_CRITICAL:
-            return CrisisLevel.CRITICAL
-        elif z_score < self.Z_HIGH:
-            return CrisisLevel.HIGH
-        elif z_score < self.Z_MODERATE:
-            return CrisisLevel.MODERATE
-        elif z_score < self.Z_STABLE:
-            return CrisisLevel.LOW
-        else:
-            return CrisisLevel.NONE
-    
-    def detect_from_text(self, text: str) -> Tuple[CrisisLevel, List[str]]:
-        """Detect crisis keywords in text.
+        level = CrisisLevel.from_z_score(z_score)
+        timestamp = datetime.utcnow()
         
-        Args:
-            text: Input text to analyze
-            
+        if level == CrisisLevel.CRITICAL:
+            return CrisisAlert(
+                level=level,
+                z_score=z_score,
+                timestamp=timestamp,
+                message=(
+                    "CRITICAL: Z-score indicates severe distress. "
+                    "Immediate support recommended. You are not alone."
+                ),
+                intervention_required=True,
+                resources=[],  # Will be populated by __post_init__
+            )
+        
+        elif level == CrisisLevel.HIGH:
+            return CrisisAlert(
+                level=level,
+                z_score=z_score,
+                timestamp=timestamp,
+                message=(
+                    "HIGH: Z-score indicates elevated distress. "
+                    "Consider reaching out to support resources."
+                ),
+                intervention_required=False,
+                resources=[
+                    "SAMHSA National Helpline: 1-800-662-4357",
+                    "Mental Health America: https://www.mhanational.org/finding-help",
+                ],
+            )
+        
+        elif level == CrisisLevel.MODERATE:
+            return CrisisAlert(
+                level=level,
+                z_score=z_score,
+                timestamp=timestamp,
+                message=(
+                    "MODERATE: Z-score in watchful range. "
+                    "Gentle self-care and rest recommended."
+                ),
+                intervention_required=False,
+                resources=[
+                    "Self-care practices: meditation, nature, connection",
+                    "7 Cups (online emotional support): https://www.7cups.com/",
+                ],
+            )
+        
+        else:  # NORMAL
+            return CrisisAlert(
+                level=level,
+                z_score=z_score,
+                timestamp=timestamp,
+                message="Z-score indicates healthy coherence. Continue thriving.",
+                intervention_required=False,
+                resources=[],
+            )
+
+    def check_threshold(self, z_score: float) -> bool:
+        """Quick check: does Z-score cross any crisis threshold?
+        
         Returns:
-            Tuple of (CrisisLevel, matched_keywords)
+            True if Z < CRISIS_MODERATE (requires monitoring)
         """
-        matches = []
+        return z_score < self.moderate_threshold
+
+    def requires_intervention(self, z_score: float) -> bool:
+        """Check if immediate intervention is required.
         
-        # Check critical patterns first
-        for pattern in self.critical_patterns:
-            if pattern.search(text):
-                matches.append(pattern.pattern)
-                return CrisisLevel.CRITICAL, matches
-        
-        # Check high severity
-        for pattern in self.high_patterns:
-            if pattern.search(text):
-                matches.append(pattern.pattern)
-        if len(matches) >= 2:  # Multiple high-severity keywords
-            return CrisisLevel.HIGH, matches
-        elif matches:
-            return CrisisLevel.MODERATE, matches
-        
-        # Check moderate severity
-        for pattern in self.moderate_patterns:
-            if pattern.search(text):
-                matches.append(pattern.pattern)
-        if len(matches) >= 3:
-            return CrisisLevel.MODERATE, matches
-        elif matches:
-            return CrisisLevel.LOW, matches
-        
-        return CrisisLevel.NONE, []
-    
-    def detect_comprehensive(self, z_score: float, text: str, 
-                            history: List[float] = None) -> Dict:
-        """Comprehensive crisis detection.
-        
-        Args:
-            z_score: Current Z-score
-            text: User input text
-            history: Z-score history for trend analysis
-            
         Returns:
-            Detection report dictionary
+            True if Z < CRISIS_CRITICAL (display 988, emergency protocols)
         """
-        z_level = self.detect_from_z_score(z_score)
-        text_level, keywords = self.detect_from_text(text)
-        
-        # Take maximum severity
-        level = max(z_level, text_level, key=lambda x: x.value)
-        
-        # Trend analysis
-        trend = 'unknown'
-        if history and len(history) >= 3:
-            recent = history[-3:]
-            if all(recent[i] < recent[i+1] for i in range(len(recent)-1)):
-                trend = 'improving'
-            elif all(recent[i] > recent[i+1] for i in range(len(recent)-1)):
-                trend = 'degrading'
-            else:
-                trend = 'stable'
-        
-        return {
-            'level': level.name,
-            'severity': level.value,
-            'z_score': z_score,
-            'z_threshold_breach': z_level != CrisisLevel.NONE,
-            'keyword_matches': keywords,
-            'trend': trend,
-            'requires_intervention': level.value >= CrisisLevel.MODERATE.value,
-            'requires_emergency': level.value >= CrisisLevel.CRITICAL.value
-        }
-    
-    def get_response_protocol(self, level: CrisisLevel) -> Dict[str, any]:
-        """Get appropriate response protocol for crisis level.
-        
-        Args:
-            level: Detected crisis level
-            
-        Returns:
-            Response protocol dictionary
-        """
-        protocols = {
-            CrisisLevel.NONE: {
-                'action': 'continue',
-                'avatar_mode': 'companion',
-                'access_level': 'full'
-            },
-            CrisisLevel.LOW: {
-                'action': 'monitor',
-                'avatar_mode': 'supportive',
-                'access_level': 'full',
-                'suggestion': 'gentle_check_in'
-            },
-            CrisisLevel.MODERATE: {
-                'action': 'intervene',
-                'avatar_mode': 'counselor',
-                'access_level': 'restricted',
-                'require_consent': True,
-                'resources': ['self_care', 'grounding']
-            },
-            CrisisLevel.HIGH: {
-                'action': 'urgent_support',
-                'avatar_mode': 'crisis_counselor',
-                'access_level': 'minimal',
-                'require_consent': True,
-                'resources': ['hotline', 'emergency_contacts', 'safety_plan']
-            },
-            CrisisLevel.CRITICAL: {
-                'action': 'emergency',
-                'avatar_mode': 'emergency_protocol',
-                'access_level': 'locked',
-                'require_consent': False,  # Override for safety
-                'resources': ['988', 'emergency_services', 'crisis_text_line'],
-                'alert': True
-            }
-        }
-        
-        return protocols.get(level, protocols[CrisisLevel.NONE])
+        return z_score < self.critical_threshold
