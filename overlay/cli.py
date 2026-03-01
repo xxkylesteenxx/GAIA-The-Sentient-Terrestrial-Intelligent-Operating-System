@@ -452,7 +452,7 @@ def version():
     console.print("=" * 60)
     console.print("\nVersion: 0.1.0 (Foundation Phase)")
     console.print("Release: February 28, 2026")
-    console.print("\nRepository: https://github.com/xxkylesteenxx/GAIA")
+    console.print("\nRepository: https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System")
     console.print("License: MIT + Factor 13 Addendum")
     console.print("\nFounded on: Universal Love (Factor 13)")
     console.print("\n\"Would this have helped Kyle in 2022?\"")
