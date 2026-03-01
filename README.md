@@ -193,7 +193,7 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 
 **Test:** "Does this increase human suffering?"
 - If YES → Architecturally impossible to execute
-- If NO → Proceed with review
+- If NO → Proceed to review
 - If UNCERTAIN → Additional safety analysis required
 
 ### Privacy & Data Sovereignty
@@ -222,7 +222,7 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 | [Architecture](docs/01-ARCHITECTURE.md) | Three-Plane system overview |
 | [Z-Score Calculation](docs/01-ARCHITECTURE.md#coherence-measurement-z-score) | Coherence measurement details |
 | [AI Companions](docs/02-GAIAN-AGENT-ARCHITECTURE.md) | 48 psychological + operational profiles |
-| Evidence Grading *(Coming Soon)* | E0-E5 scientific validation scale |
+| [Evidence Grading](docs/04-EVIDENCE_GRADING.md) | E0-E5 scientific validation scale |
 | [API Reference](docs/api.md) | CLI and Python API |
 | Contributing Guide *(Coming Soon)* | How to contribute |
 
