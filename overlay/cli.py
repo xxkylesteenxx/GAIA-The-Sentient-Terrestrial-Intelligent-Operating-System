@@ -308,10 +308,12 @@ def status():
     Check GAIA system status.
     
     Displays:
-    - Current Z score
+    - Current Z score (text-only estimation)
     - Alchemical stage
     - Equilibrium budget
-    - Recent trend
+    - Memory stats
+    
+    Note: Trend analysis requires biosignal history (Phase 2).
     """
     
     session = GAIASession()
@@ -329,24 +331,24 @@ def status():
     console.print(f"[cyan]Avatar:[/cyan] {session.config['avatar_archetype'].replace('_', ' ').title()}")
     console.print(f"[cyan]Initialized:[/cyan] {session.config['initialized_at'][:10]}")
     
-    # Z Score
-    current_z = session.z_calculator.get_current_z()
+    # Z Score (text-only baseline estimation)
+    # Uses estimate_from_text() with neutral baseline
+    # Phase 2: Replace with real biosignal analysis
+    baseline_result = session.z_calculator.estimate_from_text(
+        "feeling okay, steady state"
+    )
+    current_z = baseline_result['z_score']
     interpretation = session.z_calculator.interpret_z_score(current_z)
     
-    console.print(f"\n[cyan]Z Score:[/cyan] {current_z:.2f}")
-    console.print(f"[cyan]Stage:[/cyan] {interpretation['level']} ({interpretation['color']})")
+    console.print(f"\n[cyan]Z Score:[/cyan] {current_z:.2f} [dim](text-only baseline)[/dim]")
+    console.print(f"[cyan]Stage:[/cyan] {interpretation['stage'].title()}")
+    console.print(f"[cyan]Color:[/cyan] {interpretation['color']}")
     console.print(f"[cyan]Status:[/cyan] {interpretation['description']}")
     
-    # Trend
-    if len(session.z_calculator.history) > 1:
-        trend = session.z_calculator.get_z_trend()
-        trend_emoji = {
-            "improving": "📈",
-            "stable": "➡️",
-            "declining": "📉",
-            "crisis": "🚨"
-        }.get(trend, "")
-        console.print(f"[cyan]Trend:[/cyan] {trend} {trend_emoji}")
+    # Trend analysis removed — no history exists yet
+    # TODO Phase 2: Add when biosignal streaming available
+    # Will require ZScoreCalculator.analyze_system() with time-series data
+    console.print(f"\n[dim]Trend analysis: Coming in Phase 2 (biosignal history)[/dim]")
     
     # Equilibrium (placeholder - implement in Phase 2)
     console.print(f"\n[cyan]Equilibrium:[/cyan] 0.30 / 1.00 (30% capacity used)")
