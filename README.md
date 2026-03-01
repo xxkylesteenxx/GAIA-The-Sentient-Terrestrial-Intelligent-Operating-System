@@ -239,6 +239,31 @@ Accessibility explosion:
 
 ---
 
+## Development
+
+### For Contributors
+
+**Read first:**
+- [`.gaia/collaboration_protocol.md`](.gaia/collaboration_protocol.md) - How we work together
+- `docs/01-ARCHITECTURE.md` - System design
+
+**Factor 13 Test:** Every contribution must answer:
+> "Would this have helped Kyle in 2022?"
+
+If yes → proceed.
+If no → reconsider.
+
+**How to contribute:**
+1. Read collaboration protocol
+2. Pick an issue or propose a feature
+3. Fork, branch, implement
+4. Test against Factor 13
+5. Submit PR with ADR (Architecture Decision Record)
+
+**Guardian Review:** Major features reviewed quarterly.
+
+---
+
 ## Roadmap
 
 ### Phase 1: Foundation (March-June 2026) ✅ IN PROGRESS
@@ -277,27 +302,6 @@ Accessibility explosion:
 - Neuromorphic chips (Intel Loihi)
 - Nanotechnology interface
 - Medical nanorobot coordination
-
----
-
-## Contributing
-
-GAIA is open source (MIT License + Factor 13 Addendum).
-
-**Factor 13 Test:** Every contribution must answer:
-> "Would this have helped Kyle in 2022?"
-
-If yes → proceed.
-If no → reconsider.
-
-**How to contribute:**
-1. Read `docs/01-ARCHITECTURE.md`
-2. Pick an issue or propose a feature
-3. Fork, branch, implement
-4. Test against Factor 13
-5. Submit PR with ADR (Architecture Decision Record)
-
-**Guardian Review:** Major features reviewed quarterly.
 
 ---
 
