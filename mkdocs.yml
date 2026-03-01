@@ -1,0 +1,198 @@
+# GAIA Documentation Site Configuration
+# Build: mkdocs build
+# Serve: mkdocs serve
+# Deploy: mkdocs gh-deploy
+
+site_name: GAIA Documentation
+site_description: Sentient Terrestrial Intelligent Operating System
+site_author: Kyle Steen
+site_url: https://xxkylesteenxx.github.io/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System/
+
+repo_name: xxkylesteenxx/GAIA
+repo_url: https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2026 Kyle Steen
+
+# ===========================================================================
+# Theme - Material Design
+# ===========================================================================
+theme:
+  name: material
+  language: en
+  
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  font:
+    text: Roboto
+    code: Roboto Mono
+  
+  features:
+    - navigation.instant       # Instant navigation (SPA-like)
+    - navigation.tracking      # URL tracks scroll position
+    - navigation.tabs          # Top-level sections as tabs
+    - navigation.sections      # Section headings in sidebar
+    - navigation.expand        # Expand all sections by default
+    - navigation.indexes       # Section index pages
+    - navigation.top           # Back to top button
+    - search.suggest           # Search suggestions
+    - search.highlight         # Highlight search terms
+    - search.share             # Share search URL
+    - content.code.copy        # Copy code button
+    - content.action.edit      # Edit page on GitHub link
+  
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+# ===========================================================================
+# Navigation
+# ===========================================================================
+nav:
+  - Home: index.md
+  
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  
+  - Architecture:
+    - Overview: architecture/overview.md
+    - 12+1 Factors: architecture/factors.md
+    - Core Plane:
+      - Z-Score Calculation: architecture/core/zscore.md
+      - Crisis Detection: architecture/core/crisis.md
+      - Constants: architecture/core/constants.md
+    - Bridge Plane:
+      - Alchemical Stages: architecture/bridge/alchemy.md
+      - Pattern Recognition: architecture/bridge/patterns.md
+    - Overlay Plane:
+      - Avatar System: architecture/overlay/avatar.md
+      - Memory System: architecture/overlay/memory.md
+      - Personality: architecture/overlay/personality.md
+  
+  - API Reference:
+    - Core API: api/core.md
+    - Bridge API: api/bridge.md
+    - Overlay API: api/overlay.md
+    - WebSocket API: api/websocket.md
+  
+  - Development:
+    - Contributing: development/contributing.md
+    - Dependencies: dependencies.md
+    - Audit Remediation: AUDIT_REMEDIATION.md
+    - Testing: development/testing.md
+    - Code Quality: development/code-quality.md
+
+# ===========================================================================
+# Plugins
+# ===========================================================================
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-\.]'
+  
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+  
+  - autorefs  # Automatic cross-references
+
+# ===========================================================================
+# Markdown Extensions
+# ===========================================================================
+markdown_extensions:
+  # Admonitions (callouts)
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  
+  # Code blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  
+  # Content tabs
+  - pymdownx.tabbed:
+      alternate_style: true
+  
+  # Task lists
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  
+  # Emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  
+  # Table of contents
+  - toc:
+      permalink: true
+      toc_depth: 3
+  
+  # Attributes
+  - attr_list
+  - md_in_html
+  
+  # Footnotes
+  - footnotes
+  
+  # Abbreviations
+  - abbr
+  
+  # Definition lists
+  - def_list
+
+# ===========================================================================
+# Extra Configuration
+# ===========================================================================
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/xxkylesteenxx
+      name: GitHub Profile
+  
+  version:
+    provider: mike
+    default: latest
+  
+  analytics:
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: Thanks for your feedback!
+
+# ===========================================================================
+# Extra CSS/JS
+# ===========================================================================
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js
