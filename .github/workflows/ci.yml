@@ -7,11 +7,53 @@ on:
     branches: [ main ]
 
 jobs:
+  # ===========================================================================
+  # Code Quality (Linting, Formatting, Pre-commit)
+  # ===========================================================================
+  quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-quality-${{ hashFiles('requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-quality-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+    
+    - name: Run Ruff (linting)
+      run: |
+        ruff check core/ overlay/ infrastructure/ bridge/ --output-format=github
+    
+    - name: Run Black (format check)
+      run: |
+        black --check core/ overlay/ infrastructure/ bridge/
+    
+    - name: Validate pre-commit hooks
+      run: |
+        pre-commit run --all-files
+  
+  # ===========================================================================
+  # Testing (Unit Tests, Integration Tests, Coverage)
+  # ===========================================================================
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11', '3.12']  # Only 3.11+, <3.11 not supported
     
     steps:
     - uses: actions/checkout@v4
@@ -25,36 +67,95 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements.txt -r requirements-dev.txt
         pip install -e .
     
     - name: Run pytest with coverage
       run: |
-        pytest tests/ -v --cov=core --cov=overlay --cov=infrastructure --cov-report=xml --cov-report=term
+        pytest tests/ -v \
+          --cov=core --cov=overlay --cov=bridge --cov=infrastructure \
+          --cov-report=xml --cov-report=term-missing \
+          -m "not slow"
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         flags: unittests
-        name: codecov-umbrella
-    
-    - name: Run linting (flake8)
-      run: |
-        flake8 core/ overlay/ infrastructure/ bridge/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 core/ overlay/ infrastructure/ bridge/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+        name: codecov-${{ matrix.python-version }}
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     
     - name: Run type checking (mypy)
       run: |
-        mypy core/ overlay/ --ignore-missing-imports
+        mypy core/ overlay/ bridge/ --ignore-missing-imports
   
+  # ===========================================================================
+  # Build (Package Distribution)
+  # ===========================================================================
+  build:
+    needs: [quality, test]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Build Python package
+      run: |
+        python -m pip install --upgrade pip build
+        python -m build
+    
+    - name: Archive build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+  
+  # ===========================================================================
+  # Documentation (MkDocs → GitHub Pages)
+  # ===========================================================================
+  docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for git-revision-date-localized
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+    
+    - name: Build documentation
+      run: |
+        mkdocs build --strict
+    
+    - name: Deploy to GitHub Pages
+      run: |
+        mkdocs gh-deploy --force
+  
+  # ===========================================================================
+  # JavaScript/Electron Testing (Phase 2)
+  # ===========================================================================
   test-javascript:
     runs-on: ubuntu-latest
     
@@ -76,21 +177,3 @@ jobs:
       run: |
         echo "JavaScript tests will be added in Phase 2"
         # npm test
-  
-  build:
-    needs: [test, test-javascript]
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Build Python package
-      run: |
-        python -m pip install --upgrade pip build
-        python -m build
-    
-    - name: Archive build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist
-        path: dist/
