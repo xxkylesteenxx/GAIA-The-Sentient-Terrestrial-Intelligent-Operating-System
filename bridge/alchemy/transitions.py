@@ -1,187 +1,217 @@
-"""Alchemical Transition System for GAIA.
+"""
+ALCHEMICAL TRANSITION SYSTEM
+Bridge Plane — Factor 10 (Chaos) → Factor 12 (Balance)
 
-Implements the four-stage alchemical process:
-1. Nigredo (Blackening): Dissolution, shadow work, chaos
-2. Albedo (Whitening): Purification, integration, clarity
-3. Rubedo (Reddening): Embodiment, completion, manifestation
-4. Viriditas (Greening): Growth, vitality, renewal
+Four-stage alchemical transformation:
+    Nigredo   (Blackening)  — Dissolution, shadow work, chaos
+    Albedo    (Whitening)   — Purification, integration, clarity
+    Rubedo    (Reddening)   — Embodiment, completion, manifestation
+    Viriditas (Greening)    — Growth, vitality, renewal (Hildegard von Bingen)
 
-Based on historical alchemy grounded in chemistry:
-- Nigredo: Calcination, decomposition
-- Albedo: Distillation, crystallization
-- Rubedo: Coagulation, solidification
-- Viriditas: Fermentation, growth (Hildegard von Bingen)
-
-Phase 1: Skeleton implementation
-Phase 2: Complete with Z-score integration
+Stage boundaries are sourced from core.constants — never duplicated here.
+This ensures the alchemical map matches the Z-score interpretation everywhere
+in the codebase (README, CLI output, Avatar speech, crisis detector).
 """
 
-from enum import Enum
-from typing import Dict, Optional
-from dataclasses import dataclass
+from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
+from enum import Enum
+from typing import Dict
+
+from core.constants import (
+    Z_CRISIS_UPPER,       # 2.0  — crisis / nigredo boundary
+    Z_NIGREDO_UPPER,      # 4.0  — nigredo / albedo boundary
+    Z_ALBEDO_UPPER,       # 6.0  — albedo / rubedo boundary
+    Z_RUBEDO_UPPER,       # 8.0  — rubedo / viriditas boundary
+    Z_VIRIDITAS_UPPER,    # 10.0 — viriditas / transcendent boundary
+)
 
 logger = logging.getLogger(__name__)
 
 
+# ---------------------------------------------------------------------------
+# Stage enum
+# ---------------------------------------------------------------------------
+
+
 class AlchemicalStage(Enum):
     """Four stages of alchemical transformation."""
-    NIGREDO = "nigredo"      # Chaos, dissolution
-    ALBEDO = "albedo"        # Purification, clarity
-    RUBEDO = "rubedo"        # Embodiment, completion
-    VIRIDITAS = "viriditas"  # Growth, vitality
+
+    NIGREDO = "nigredo"       # Chaos, dissolution
+    ALBEDO = "albedo"         # Purification, clarity
+    RUBEDO = "rubedo"         # Embodiment, completion
+    VIRIDITAS = "viriditas"   # Growth, vitality
+
+
+# Stage metadata table — single place to update copy / colours / elements.
+_STAGE_DATA: Dict[AlchemicalStage, Dict] = {
+    AlchemicalStage.NIGREDO: {
+        "theme": "dissolution",
+        "guidance": "Embrace the shadow; allow decomposition.",
+        "color": "#1a1a1a",
+        "element": "earth",
+        "z_min": 0.0,
+        "z_max": Z_NIGREDO_UPPER,   # 4.0
+    },
+    AlchemicalStage.ALBEDO: {
+        "theme": "purification",
+        "guidance": "Distil essence; seek clarity.",
+        "color": "#e8e8e8",
+        "element": "water",
+        "z_min": Z_NIGREDO_UPPER,   # 4.0
+        "z_max": Z_ALBEDO_UPPER,    # 6.0
+    },
+    AlchemicalStage.RUBEDO: {
+        "theme": "embodiment",
+        "guidance": "Integrate wisdom; manifest completion.",
+        "color": "#cc4400",
+        "element": "fire",
+        "z_min": Z_ALBEDO_UPPER,    # 6.0
+        "z_max": Z_RUBEDO_UPPER,    # 8.0
+    },
+    AlchemicalStage.VIRIDITAS: {
+        "theme": "vitality",
+        "guidance": "Flourish, grow, renew.",
+        "color": "#00cc44",
+        "element": "air",
+        "z_min": Z_RUBEDO_UPPER,    # 8.0
+        "z_max": 12.0,
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# Context dataclass
+# ---------------------------------------------------------------------------
 
 
 @dataclass
 class TransitionContext:
-    """Context for alchemical transition."""
+    """Snapshot of user state at the moment a transition is evaluated."""
+
     current_stage: AlchemicalStage
     z_score: float
-    emotional_state: str
-    crisis_level: str
-    equilibrium_capacity: float
+    emotional_state: str = ""
+    crisis_level: str = "NONE"
+    equilibrium_capacity: float = 1.0
+
+
+# ---------------------------------------------------------------------------
+# Transition manager
+# ---------------------------------------------------------------------------
 
 
 class AlchemicalTransitions:
-    """Manage alchemical stage transitions."""
-    
-    # Z-score thresholds for stage transitions
-    NIGREDO_THRESHOLD = 3.0   # Below: Crisis/chaos
-    ALBEDO_THRESHOLD = 6.0    # Below: Purification needed
-    RUBEDO_THRESHOLD = 9.0    # Below: Integration phase
-    VIRIDITAS_THRESHOLD = 11.0  # Above: Optimal growth
-    
-    def __init__(self):
-        """Initialize transition system."""
+    """
+    Manage alchemical stage transitions.
+
+    Usage::
+
+        transitions = AlchemicalTransitions()
+
+        context = TransitionContext(
+            current_stage=AlchemicalStage.NIGREDO,
+            z_score=5.2,
+        )
+        result = transitions.transition(context)
+
+        if result["transition"]:
+            print(result["to_stage"])   # "albedo"
+            print(result["guidance"])
+    """
+
+    def __init__(self) -> None:
         self.current_stage = AlchemicalStage.NIGREDO
-    
+
+    # ------------------------------------------------------------------ #
+    # Public API                                                           #
+    # ------------------------------------------------------------------ #
+
     def determine_stage(self, z_score: float) -> AlchemicalStage:
-        """Determine appropriate alchemical stage from Z-score.
-        
-        Args:
-            z_score: Current coherence score
-            
-        Returns:
-            Appropriate alchemical stage
         """
-        if z_score < self.NIGREDO_THRESHOLD:
-            return AlchemicalStage.NIGREDO
-        elif z_score < self.ALBEDO_THRESHOLD:
+        Map a Z-score to the appropriate alchemical stage.
+
+        Crisis (Z < 2.0) is mapped to Nigredo — the user is in the dark
+        night; alchemical work begins once intervention has stabilised them.
+        """
+        if z_score < Z_ALBEDO_UPPER:       # < 6.0  →  nigredo or albedo
+            if z_score < Z_NIGREDO_UPPER:  # < 4.0  →  nigredo (incl. crisis)
+                return AlchemicalStage.NIGREDO
             return AlchemicalStage.ALBEDO
-        elif z_score < self.RUBEDO_THRESHOLD:
+        if z_score < Z_RUBEDO_UPPER:       # 6.0–8.0
             return AlchemicalStage.RUBEDO
-        else:
-            return AlchemicalStage.VIRIDITAS
-    
+        return AlchemicalStage.VIRIDITAS   # ≥ 8.0
+
     def transition(self, context: TransitionContext) -> Dict:
-        """Execute alchemical transition.
-        
-        Args:
-            context: Current transition context
-            
-        Returns:
-            Transition result dictionary
+        """
+        Evaluate whether a stage transition is warranted.
+
+        Returns a result dict.  If transition occurred,
+        ``result["transition"]`` is True and the new stage data is included.
         """
         target_stage = self.determine_stage(context.z_score)
-        
-        if target_stage != context.current_stage:
-            result = self._execute_transition(
-                from_stage=context.current_stage,
-                to_stage=target_stage,
-                context=context
-            )
-            self.current_stage = target_stage
-            return result
-        else:
+
+        if target_stage == context.current_stage:
             return {
-                'transition': False,
-                'stage': context.current_stage.value,
-                'message': 'Remaining in current stage'
+                "transition": False,
+                "stage": context.current_stage.value,
+                "message": "Remaining in current stage.",
+                "stage_data": _STAGE_DATA[context.current_stage],
             }
-    
-    def _execute_transition(self, from_stage: AlchemicalStage, 
-                           to_stage: AlchemicalStage,
-                           context: TransitionContext) -> Dict:
-        """Execute specific stage transition.
-        
-        Args:
-            from_stage: Current stage
-            to_stage: Target stage
-            context: Transition context
-            
-        Returns:
-            Transition result
-        """
-        logger.info(f"Alchemical transition: {from_stage.value} → {to_stage.value}")
-        
-        # Phase 2: Implement full transition logic
-        # For now, return basic transition data
-        
-        transitions = {
-            AlchemicalStage.NIGREDO: {
-                'theme': 'dissolution',
-                'guidance': 'Embrace the shadow, allow decomposition',
-                'color': 'black',
-                'element': 'earth'
-            },
-            AlchemicalStage.ALBEDO: {
-                'theme': 'purification',
-                'guidance': 'Distill essence, seek clarity',
-                'color': 'white',
-                'element': 'water'
-            },
-            AlchemicalStage.RUBEDO: {
-                'theme': 'embodiment',
-                'guidance': 'Integrate wisdom, manifest completion',
-                'color': 'red',
-                'element': 'fire'
-            },
-            AlchemicalStage.VIRIDITAS: {
-                'theme': 'vitality',
-                'guidance': 'Flourish, grow, renew',
-                'color': 'green',
-                'element': 'air'
-            }
-        }
-        
+
+        logger.info(
+            "Alchemical transition: %s → %s  (Z=%.2f)",
+            context.current_stage.value,
+            target_stage.value,
+            context.z_score,
+        )
+
+        self.current_stage = target_stage
+
         return {
-            'transition': True,
-            'from_stage': from_stage.value,
-            'to_stage': to_stage.value,
-            'stage_data': transitions[to_stage],
-            'z_score': context.z_score
+            "transition": True,
+            "from_stage": context.current_stage.value,
+            "to_stage": target_stage.value,
+            "stage_data": _STAGE_DATA[target_stage],
+            "guidance": _STAGE_DATA[target_stage]["guidance"],
+            "z_score": context.z_score,
         }
-    
+
     def get_stage_guidance(self, stage: AlchemicalStage) -> str:
-        """Get guidance for current alchemical stage.
-        
-        Args:
-            stage: Current alchemical stage
-            
-        Returns:
-            Guidance string
-        """
-        guidance = {
+        """Return long-form guidance text for the given stage."""
+
+        _GUIDANCE: Dict[AlchemicalStage, str] = {
             AlchemicalStage.NIGREDO: (
-                "You are in Nigredo, the stage of dissolution. "
-                "This is a time to face shadows, release what no longer serves, "
-                "and allow transformation through decomposition. Chaos precedes creation."
+                "You are in Nigredo — the stage of dissolution. "
+                "This is the time to face shadows, release what no longer serves, "
+                "and allow transformation through decomposition. "
+                "Chaos precedes creation. "
+                "Z range: 0 – 4."
             ),
             AlchemicalStage.ALBEDO: (
-                "You are in Albedo, the stage of purification. "
-                "Focus on clarity, distill essence from experience, "
-                "and integrate lessons. The mud settles, revealing clear water."
+                "You are in Albedo — the stage of purification. "
+                "Focus on clarity, distil essence from experience, "
+                "and integrate lessons. The mud settles; clear water emerges. "
+                "Z range: 4 – 6."
             ),
             AlchemicalStage.RUBEDO: (
-                "You are in Rubedo, the stage of embodiment. "
-                "Wisdom becomes flesh, insights manifest as action, "
-                "and completion approaches. The fire tempers the metal."
+                "You are in Rubedo — the stage of embodiment. "
+                "Wisdom becomes action; insights manifest; completion approaches. "
+                "The fire tempers the metal. "
+                "Z range: 6 – 8."
             ),
             AlchemicalStage.VIRIDITAS: (
-                "You are in Viriditas, the stage of greening. "
-                "Life force flows freely, growth is natural, vitality abounds. "
-                "You flourish in the garden of your becoming."
-            )
+                "You are in Viriditas — the stage of greening. "
+                "Life force flows freely; growth is natural; vitality abounds. "
+                "You flourish in the garden of your becoming. "
+                "Z range: 8 – 12."
+            ),
         }
-        
-        return guidance.get(stage, "Unknown stage")
+
+        return _GUIDANCE.get(stage, "Unknown stage.")
+
+    def get_full_stage_data(self, stage: AlchemicalStage) -> Dict:
+        """Return complete metadata for the given stage."""
+        return _STAGE_DATA.get(stage, {})
