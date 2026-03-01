@@ -133,13 +133,24 @@ gaia --help
 
 **Formula:**
 ```
-Z = 12 × C × F × B
+Z = 12 × √(C × F × B)
 ```
 
-Where:
-- **C (Order):** Shannon entropy of HRV signal
-- **F (Freedom):** Lyapunov exponent of EEG signal
-- **B (Balance):** Symmetry index of respiratory signal
+**Geometric Mean Rationale:**
+
+The square root (geometric mean) is intentional:
+- **Joint necessity**: If ANY component collapses to zero, Z collapses to zero
+- **No compensation**: A human can't compensate for zero balance with infinite order
+- **Fail-safe behavior**: Prevents false positives in crisis detection
+
+This correctly models the three forces as jointly necessary, not interchangeable.
+
+**Components:**
+- **C (Coherence):** Shannon entropy of HRV signal (inverted, normalized to [0,1])
+- **F (Fidelity):** Pattern symmetry of EEG signal via Lyapunov exponent
+- **B (Balance):** Positive:negative ratio via Gottman 5:1 rule (respiratory proxy)
+
+**Canonical Implementation:** [`core/zscore/calculator.py`](core/zscore/calculator.py)
 
 **Thresholds:**
 
@@ -222,7 +233,7 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/01-ARCHITECTURE.md) | Three-Plane system overview |
-| [Z-Score Calculation](docs/01-ARCHITECTURE.md#coherence-measurement-z-score) | Coherence measurement details |
+| [Z-Score Calculation](core/zscore/calculator.py) | Coherence measurement canonical implementation |
 | [AI Companions](docs/02-GAIAN-AGENT-ARCHITECTURE.md) | 48 psychological + operational profiles |
 | [Evidence Grading](docs/04-EVIDENCE_GRADING.md) | E0-E5 scientific validation scale |
 | [Living Environment Engine](docs/05-LIVING-ENVIRONMENT-ENGINE.md) | Dynamic 3D environment system |
