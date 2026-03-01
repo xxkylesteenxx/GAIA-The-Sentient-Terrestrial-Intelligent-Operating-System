@@ -25,6 +25,44 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
+# Dependencies migrated from setup.py for PEP 621 compliance
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "chromadb>=0.4.0",
+    "sentence-transformers>=2.2.0",
+    "cryptography>=41.0.0",
+    "kerykeion>=4.0.0",
+]
+
+# Optional dependencies (install with: pip install .[dev] or .[video])
+[project.optional-dependencies]
+video = [
+    "opencv-python>=4.8.0",
+    "deepface>=0.0.79",
+]
+quantum = [
+    "qiskit>=0.44.0",
+    "qiskit-aer>=0.12.0",
+]
+neuromorphic = [
+    "nengo>=3.2.0",
+    "nengo-loihi>=1.1.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+]
+
+# Console scripts - Required for 'gaia' CLI command
+[project.scripts]
+gaia = "overlay.cli:cli"
+
 [project.urls]
 Homepage = "https://github.com/xxkylesteenxx/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System"
 Documentation = "https://xxkylesteenxx.github.io/GAIA-The-Sentient-Terrestrial-Intelligent-Operating-System/"
