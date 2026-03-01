@@ -1,60 +1,72 @@
-# GAIA Core Dependencies
-# Phase 1 Build - Updated 2026-02-28
-# All package names verified against PyPI
+# GAIA Requirements
+# Generated: 2026-02-28
+# Python >= 3.11 required
+#
+# Install:
+#   pip install -r requirements.txt
+#
+# Note: setup.py install_requires must mirror the packages below.
+# See docs/dependencies.md for the rationale behind each package.
 
-# ============================================================================
-# Core Plane - Consciousness Measurement
-# ============================================================================
+# ===========================================================================
+# Core Plane — Consciousness Measurement
+# ===========================================================================
 
-# Scientific Computing (Z-score calculation)
+# Z-score computation (geometric mean: Z = 12 × √(C × F × B))
 numpy>=1.24.0         # Array operations, biosignal processing
-scipy>=1.11.0         # Shannon entropy, Lyapunov exponent
+scipy>=1.10.0         # Shannon entropy, Lyapunov exponent
 
-# ============================================================================
-# Bridge Plane - Real-time Communication
-# ============================================================================
+# ===========================================================================
+# Bridge Plane — Real-time Communication
+# ===========================================================================
 
-# WebSocket API (Three-Plane Architecture)
+# WebSocket API (Three-Port Architecture: 8765/8766/8767)
 websockets>=12.0      # Core/Bridge/Overlay WebSocket servers
 aiohttp>=3.9.0        # Async HTTP client for external APIs
 
-# ============================================================================
-# Overlay Plane - Avatar & Memory
-# ============================================================================
+# REST API (Phase 2)
+fastapi>=0.100.0      # REST API framework (OpenAPI/Swagger)
+uvicorn>=0.22.0       # ASGI server for FastAPI
 
-# LLM Integration
-openai>=1.0.0         # GPT-4 API (Avatar inference)
-anthropic>=0.18.0     # Claude API (CORRECT: was 'anthropicsdk')
+# ===========================================================================
+# Overlay Plane — Avatar & Memory
+# ===========================================================================
 
-# Semantic Memory
-chromadb>=0.4.22      # Vector database (MODERN API: PersistentClient)
+# LLM Integration (Avatar personality)
+# NOTE: Only ONE is required (user choice). Install both for flexibility.
+# openai>=1.0.0       # GPT-4 API (Avatar inference) - OPTIONAL
+anthropic>=0.20.0     # Claude API (CORRECT: was 'anthropicsdk')
 
-# Astrology Engine
-kerykeion>=4.0.0      # Natal chart calculation
-pyswisseph>=2.10.0    # Swiss Ephemeris (CORRECT: was 'swisseph')
+# Semantic Memory (ChromaDB + embeddings)
+chromadb>=0.4.22              # Vector database (MODERN API: PersistentClient)
+sentence-transformers>=2.2.0  # Sentence embeddings for semantic recall
 
-# ============================================================================
+# Astrological Engine (Natal charts, archetypal mapping)
+kerykeion>=4.0.0      # Natal chart calculation (high-level API)
+pyswisseph>=2.10.3    # Swiss Ephemeris (CORRECT: was 'swisseph')
+
+# ===========================================================================
 # Security & Configuration
-# ============================================================================
+# ===========================================================================
 
 cryptography>=41.0.0  # Memory encryption, consent protocols
-pyyaml>=6.0.0         # Configuration files
-python-dotenv>=1.0.0  # Environment variable management
+pyyaml>=6.0.0         # Configuration files (config.yaml)
+python-dotenv>=1.0.0  # Environment variable management (.env)
+pydantic>=2.0.0       # Data validation, settings management
 
-# ============================================================================
+# ===========================================================================
 # CLI & User Interface
-# ============================================================================
+# ===========================================================================
 
 click>=8.1.0          # CLI framework (overlay/cli.py)
 rich>=13.0.0          # Terminal UI, colored output, tables
 
-# ============================================================================
-# Development & Testing
-# ============================================================================
-
-pytest>=7.4.0         # Test framework
-pytest-asyncio>=0.21.0  # Async test support
-pytest-cov>=4.1.0     # Coverage reporting
-black~=23.0           # Code formatter (pinned major version)
-flake8~=6.0           # Linter
-mypy~=1.5             # Type checker
+# ===========================================================================
+# Development & Testing (install separately: pip install -r requirements-dev.txt)
+# ===========================================================================
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# pytest-cov>=4.1.0
+# black~=23.0
+# flake8~=6.0
+# mypy~=1.5
