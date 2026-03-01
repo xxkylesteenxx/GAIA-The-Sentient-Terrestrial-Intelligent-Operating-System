@@ -224,7 +224,7 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 | [AI Companions](docs/02-GAIAN-AGENT-ARCHITECTURE.md) | 48 psychological + operational profiles |
 | [Evidence Grading](docs/04-EVIDENCE_GRADING.md) | E0-E5 scientific validation scale |
 | [API Reference](docs/api.md) | CLI and Python API |
-| Contributing Guide *(Coming Soon)* | How to contribute |
+| [Contributing Guide](CONTRIBUTING.md) | How to contribute |
 
 ---
 
@@ -291,6 +291,8 @@ Every contribution must pass:
 - UNCERTAIN → Additional safety analysis
 
 Major features reviewed quarterly by Guardian Council.
+
+**Full guidelines:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
