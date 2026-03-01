@@ -1,34 +1,60 @@
 # GAIA Core Dependencies
 # Phase 1 Build - Updated 2026-02-28
+# All package names verified against PyPI
 
-# WebSocket API
-websockets>=12.0
-aiohttp>=3.9.0
+# ============================================================================
+# Core Plane - Consciousness Measurement
+# ============================================================================
 
 # Scientific Computing (Z-score calculation)
-numpy>=1.24.0
-scipy>=1.11.0
+numpy>=1.24.0         # Array operations, biosignal processing
+scipy>=1.11.0         # Shannon entropy, Lyapunov exponent
 
-# Avatar & LLM Integration
-openai>=1.0.0
-anthropicsdk>=0.18.0
-chromadb>=0.4.22
+# ============================================================================
+# Bridge Plane - Real-time Communication
+# ============================================================================
 
-# Astrology (natal charts)
-kerykeion>=4.0.0
-swisseph>=2.10.0
+# WebSocket API (Three-Plane Architecture)
+websockets>=12.0      # Core/Bridge/Overlay WebSocket servers
+aiohttp>=3.9.0        # Async HTTP client for external APIs
 
-# Cryptography (memory encryption)
-cryptography>=41.0.0
+# ============================================================================
+# Overlay Plane - Avatar & Memory
+# ============================================================================
 
-# Configuration
-pyyaml>=6.0.0
-python-dotenv>=1.0.0
+# LLM Integration
+openai>=1.0.0         # GPT-4 API (Avatar inference)
+anthropic>=0.18.0     # Claude API (CORRECT: was 'anthropicsdk')
 
-# Development
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-pytest-cov>=4.1.0
-black>=23.0.0
-flake8>=6.0.0
-mypy>=1.5.0
+# Semantic Memory
+chromadb>=0.4.22      # Vector database (MODERN API: PersistentClient)
+
+# Astrology Engine
+kerykeion>=4.0.0      # Natal chart calculation
+pyswisseph>=2.10.0    # Swiss Ephemeris (CORRECT: was 'swisseph')
+
+# ============================================================================
+# Security & Configuration
+# ============================================================================
+
+cryptography>=41.0.0  # Memory encryption, consent protocols
+pyyaml>=6.0.0         # Configuration files
+python-dotenv>=1.0.0  # Environment variable management
+
+# ============================================================================
+# CLI & User Interface
+# ============================================================================
+
+click>=8.1.0          # CLI framework (overlay/cli.py)
+rich>=13.0.0          # Terminal UI, colored output, tables
+
+# ============================================================================
+# Development & Testing
+# ============================================================================
+
+pytest>=7.4.0         # Test framework
+pytest-asyncio>=0.21.0  # Async test support
+pytest-cov>=4.1.0     # Coverage reporting
+black~=23.0           # Code formatter (pinned major version)
+flake8~=6.0           # Linter
+mypy~=1.5             # Type checker
