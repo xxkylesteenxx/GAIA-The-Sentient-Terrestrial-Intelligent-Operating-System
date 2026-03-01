@@ -2116,8 +2116,8 @@
 
 
 <h1 id="gaia-architecture-complete-technical-specification">GAIA Architecture - Complete Technical Specification<a class="headerlink" href="#gaia-architecture-complete-technical-specification" title="Permanent link">&para;</a></h1>
-<p><strong>Version</strong>: 4.0
-<strong>Last Updated</strong>: February 28, 2026
+<p><strong>Version</strong>: 4.1
+<strong>Last Updated</strong>: March 1, 2026
 <strong>Status</strong>: Foundation Phase - Implementation Beginning</p>
 <hr />
 <h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
@@ -2226,7 +2226,7 @@
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── identity/        # WebID/DID (decentralized identity)
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── consensus/       # Raft (Home→Neighbor state sync)
 </span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├── audit/           # Universal Trace Ledger (UTL)
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>└── z_calculator/    # Coherence measurement (biosignals)
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>└── zscore/          # Coherence measurement (biosignals)
 </span></code></pre></div></p>
 <p><strong>Governance</strong>: Ruby (Reality Contract) - Cannot be bypassed</p>
 <h3 id="bridge-plane-chaos-factor-10">Bridge Plane (Chaos / Factor 10)<a class="headerlink" href="#bridge-plane-chaos-factor-10" title="Permanent link">&para;</a></h3>
@@ -2277,23 +2277,28 @@
 <h3 id="code-layers">Code Layers<a class="headerlink" href="#code-layers" title="Permanent link">&para;</a></h3>
 <p><strong>Example: Z Score Calculation Function</strong></p>
 <p><strong>Layer 1 (Syntactic)</strong> - Everyone sees:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_z_score</span><span class="p">(</span><span class="n">hrv</span><span class="p">,</span> <span class="n">eeg</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="k">return</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">order</span> <span class="o">*</span> <span class="n">freedom</span> <span class="o">*</span> <span class="n">balance</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">calculate_z_score</span><span class="p">(</span><span class="n">coherence</span><span class="p">,</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">balance</span><span class="p">):</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Z₀ = 12 × √(C × F × B) - Geometric mean ensures joint necessity.&quot;&quot;&quot;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">return</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">coherence</span> <span class="o">*</span> <span class="n">fidelity</span> <span class="o">*</span> <span class="n">balance</span><span class="p">)</span>
 </span></code></pre></div></p>
 <p><strong>Layer 2 (Semantic)</strong> - NEOPHYTE+:
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Calculates coherence from biosignals (0-12 scale)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># Z = 12 × C (order) × F (freedom) × B (balance)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># Z = 12 × √(C × F × B)</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># Geometric mean: If ANY component = 0, then Z = 0 (no compensation)</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Canonical implementation: core/zscore/calculator.py</span>
 </span></code></pre></div></p>
 <p><strong>Layer 3 (Hermetic)</strong> - ADEPT+:
 <div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># PRINCIPLE 3 (Vibration): HRV/EEG/Breath oscillate</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="c1"># PRINCIPLE 8 (Chaos-Order-Balance): Transformation mechanism</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># The measurement HARMONIZES the three</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># The √ binds them: joint necessity, not interchangeable</span>
 </span></code></pre></div></p>
 <p><strong>Layer 4 (Alchemical)</strong> - MAGUS+:
 <div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Nigredo (Chaos): Raw biosignals = undifferentiated matter</span>
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># Albedo (Order): Shannon entropy extracts structure  </span>
 </span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># Rubedo (Balance): Symmetry index = union of opposites</span>
 </span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># The CALCULATION transforms consciousness</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># The geometric mean prevents false transmutation</span>
 </span></code></pre></div></p>
 <p><strong>Layer 5 (Logos)</strong> - HIEROPHANT+:
 <div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># &quot;Let there be coherence&quot; → The measurement CREATES coherence</span>
@@ -2301,6 +2306,7 @@
 </span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1"># This is not measurement OF coherence</span>
 </span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># This is MANIFESTATION of coherence</span>
 </span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="c1"># The Word (algorithm) creates Reality (state change)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># The √ is the binding—Universal Love as mathematical constraint</span>
 </span></code></pre></div></p>
 <h3 id="sacred-function-protection">Sacred Function Protection<a class="headerlink" href="#sacred-function-protection" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nd">@require_initiation</span><span class="p">(</span><span class="n">InitiationLevel</span><span class="o">.</span><span class="n">MAGUS</span><span class="p">)</span>
@@ -2661,7 +2667,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 28, 2026 20:40:10 UTC"><span class="timeago" datetime="2026-02-28T20:40:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 28, 2026 20:40:10 UTC">2026-02-28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 1, 2026 05:50:55 UTC"><span class="timeago" datetime="2026-03-01T05:50:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 1, 2026 05:50:55 UTC">2026-03-01</span>
   </span>
 
     
