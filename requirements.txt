@@ -17,7 +17,7 @@ numpy>=1.24.0         # Array operations, biosignal processing
 scipy>=1.10.0         # Shannon entropy, Lyapunov exponent
 
 # ===========================================================================
-# Bridge Plane — Real-time Communication
+# Bridge Plane — Real-time Communication & Environment
 # ===========================================================================
 
 # WebSocket API (Three-Port Architecture: 8765/8766/8767)
@@ -27,6 +27,9 @@ aiohttp>=3.9.0        # Async HTTP client for external APIs
 # REST API (Phase 2)
 fastapi>=0.100.0      # REST API framework (OpenAPI/Swagger)
 uvicorn>=0.22.0       # ASGI server for FastAPI
+
+# Living Environment Engine (LEE)
+requests>=2.31.0      # OpenWeatherMap API client
 
 # ===========================================================================
 # Overlay Plane — Avatar & Memory
