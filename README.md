@@ -220,11 +220,11 @@ All GAIA systems enforce **Factor 13** - an immutable constraint preventing:
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/01-ARCHITECTURE.md) | Three-Plane system overview |
-| [Z-Score Calculation](docs/02-Z_SCORE.md) | Coherence measurement details |
-| [AI Companions](docs/03-GAIAN_SYSTEM.md) | 48 psychological + operational profiles |
-| [Evidence Grading](docs/04-EVIDENCE_GRADING.md) | E0-E5 scientific validation scale |
-| [API Reference](docs/05-API.md) | CLI and Python API |
-| [Contributing Guide](CONTRIBUTING.md) | How to contribute |
+| [Gaian Agent System](docs/02-GAIAN-AGENT-ARCHITECTURE.md) | 48 psychological + operational profiles |
+| [Global Tech Grid](docs/03-GLOBAL-TECH-GRID-INTEGRATION.md) | Infrastructure integration |
+| [API Reference](docs/api.md) | CLI and Python API |
+
+**Note:** Additional documentation (Z-Score details, Evidence Grading, Contributing Guide) coming soon.
 
 ---
 
