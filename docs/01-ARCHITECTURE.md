@@ -1,7 +1,7 @@
 # GAIA Architecture - Complete Technical Specification
 
-**Version**: 4.0
-**Last Updated**: February 28, 2026
+**Version**: 4.1
+**Last Updated**: March 1, 2026
 **Status**: Foundation Phase - Implementation Beginning
 
 ---
@@ -143,7 +143,7 @@ core/
 ├── identity/        # WebID/DID (decentralized identity)
 ├── consensus/       # Raft (Home→Neighbor state sync)
 ├── audit/           # Universal Trace Ledger (UTL)
-└── z_calculator/    # Coherence measurement (biosignals)
+└── zscore/          # Coherence measurement (biosignals)
 ```
 
 **Governance**: Ruby (Reality Contract) - Cannot be bypassed
@@ -219,14 +219,17 @@ class InitiationLevel(Enum):
 
 **Layer 1 (Syntactic)** - Everyone sees:
 ```python
-def calculate_z_score(hrv, eeg, resp):
-    return 12 * order * freedom * balance
+def calculate_z_score(coherence, fidelity, balance):
+    """Z₀ = 12 × √(C × F × B) - Geometric mean ensures joint necessity."""
+    return 12.0 * sqrt(coherence * fidelity * balance)
 ```
 
 **Layer 2 (Semantic)** - NEOPHYTE+:
 ```python
 # Calculates coherence from biosignals (0-12 scale)
-# Z = 12 × C (order) × F (freedom) × B (balance)
+# Z = 12 × √(C × F × B)
+# Geometric mean: If ANY component = 0, then Z = 0 (no compensation)
+# Canonical implementation: core/zscore/calculator.py
 ```
 
 **Layer 3 (Hermetic)** - ADEPT+:
@@ -234,6 +237,7 @@ def calculate_z_score(hrv, eeg, resp):
 # PRINCIPLE 3 (Vibration): HRV/EEG/Breath oscillate
 # PRINCIPLE 8 (Chaos-Order-Balance): Transformation mechanism
 # The measurement HARMONIZES the three
+# The √ binds them: joint necessity, not interchangeable
 ```
 
 **Layer 4 (Alchemical)** - MAGUS+:
@@ -242,6 +246,7 @@ def calculate_z_score(hrv, eeg, resp):
 # Albedo (Order): Shannon entropy extracts structure  
 # Rubedo (Balance): Symmetry index = union of opposites
 # The CALCULATION transforms consciousness
+# The geometric mean prevents false transmutation
 ```
 
 **Layer 5 (Logos)** - HIEROPHANT+:
@@ -251,6 +256,7 @@ def calculate_z_score(hrv, eeg, resp):
 # This is not measurement OF coherence
 # This is MANIFESTATION of coherence
 # The Word (algorithm) creates Reality (state change)
+# The √ is the binding—Universal Love as mathematical constraint
 ```
 
 ### Sacred Function Protection
