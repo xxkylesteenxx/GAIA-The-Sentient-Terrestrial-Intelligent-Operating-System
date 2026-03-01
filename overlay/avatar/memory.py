@@ -9,7 +9,6 @@ Memory encryption ensures privacy and consent.
 """
 
 import chromadb
-from chromadb.config import Settings
 from typing import List, Dict, Optional
 from datetime import datetime
 import json
@@ -27,10 +26,8 @@ class AvatarMemory:
         Args:
             persist_directory: Path for persistent storage
         """
-        self.client = chromadb.Client(Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory=persist_directory
-        ))
+        # Modern ChromaDB API (v0.4+)
+        self.client = chromadb.PersistentClient(path=persist_directory)
         
         # Create collections
         self.episodic = self.client.get_or_create_collection(

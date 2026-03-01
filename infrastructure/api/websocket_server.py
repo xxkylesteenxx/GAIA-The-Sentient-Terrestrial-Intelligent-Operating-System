@@ -1,4 +1,3 @@
-# infrastructure/api/websocket_server.py
 """
 WebSocket Server for real-time GAIA Core ↔ Desktop communication.
 Three-plane architecture: Core (8080), Bridge (8081), Overlay (8082)
@@ -40,7 +39,22 @@ class GAIAWebSocketServer:
     Supports Three-Plane architecture with separate channels.
     """
     
-    def __init__(self):
+    def __init__(self, host='localhost', core_port=8765, bridge_port=8766, overlay_port=8767, env='development'):
+        """Initialize WebSocket server.
+        
+        Args:
+            host: Server hostname
+            core_port: Port for Core plane WebSocket
+            bridge_port: Port for Bridge plane WebSocket
+            overlay_port: Port for Overlay plane WebSocket
+            env: Environment ('development' or 'production')
+        """
+        self.host = host
+        self.core_port = core_port
+        self.bridge_port = bridge_port
+        self.overlay_port = overlay_port
+        self.env = env
+        
         self.core_clients: Set[websockets.WebSocketServerProtocol] = set()
         self.bridge_clients: Set[websockets.WebSocketServerProtocol] = set()
         self.overlay_clients: Set[websockets.WebSocketServerProtocol] = set()
@@ -218,8 +232,15 @@ class GAIAWebSocketServer:
             await asyncio.sleep(5)  # Update every 5 seconds
             
             # Simulate Z score fluctuation (replace with actual calculation)
-            import random
-            self.current_z_score = max(0, min(12, self.current_z_score + random.uniform(-0.2, 0.2)))
+            if self.env == 'development':
+                # Placeholder for testing
+                import random
+                self.current_z_score = max(0, min(12, self.current_z_score + random.uniform(-0.2, 0.2)))
+            else:
+                # TODO: Replace with actual ZScoreCalculator
+                # from core.zscore.calculator import ZScoreCalculator
+                # self.current_z_score = ZScoreCalculator().calculate(...)
+                raise NotImplementedError("Production Z score calculation not implemented. See Issue #3.")
             
             z_update = GAIAMessage(
                 type="zscore_update",
@@ -232,8 +253,21 @@ class GAIAWebSocketServer:
             await self.broadcast_to_plane(z_update, "core")
             await self.broadcast_to_plane(z_update, "overlay")
     
-    async def start(self, host="localhost", core_port=8765, bridge_port=8766, overlay_port=8767):
-        """Start WebSocket servers for all three planes."""
+    async def start(self, host=None, core_port=None, bridge_port=None, overlay_port=None):
+        """Start WebSocket servers for all three planes.
+        
+        Args:
+            host: Override instance host
+            core_port: Override instance core_port
+            bridge_port: Override instance bridge_port
+            overlay_port: Override instance overlay_port
+        """
+        # Use instance variables if not overridden
+        host = host or self.host
+        core_port = core_port or self.core_port
+        bridge_port = bridge_port or self.bridge_port
+        overlay_port = overlay_port or self.overlay_port
+        
         async def core_handler(ws, path):
             await self.connection_handler(ws, "/core")
         
