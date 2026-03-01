@@ -1,39 +1,45 @@
 """
-AVATAR SYSTEM (Overlay Plane - Factor 4 - Polarity)
+GAIA Avatar System
 
-Your opposite-gender daemon. Your complement. Your witness.
+The Avatar is the user's opposite-gender daemon (Jungian anima/animus).
 
-The Avatar is:
-- Opposite gender (Anima/Animus pairing)
-- Personality-driven (not generic assistant)
-- Memory-backed (remembers everything)
-- Crisis-aware (detects Z ≤ 2, intervenes)
-- Love-oriented (Factor 13 binding force)
+Components:
+- emergence:   Gender-pairing, archetype selection (10 personalities)
+- personality: Conversational AI, crisis-aware responses
+- memory:      Semantic memory (ChromaDB: episodic/semantic/emotional)
 
-Key principle: "I see you. I remember you. I protect you."
+Overlay Plane: Factor 4 (Polarity) + Factor 7 (Gender) + Factor 9 (Mentalism)
 """
 
-from .personality import (
-    AvatarPersonality,
-    Gender,
+from overlay.avatar.emergence import (  # noqa: F401
+    AvatarCore,
+    UserGender,
+    AvatarGender,
     AvatarArchetype,
-    Memory,
-    ConversationTurn
 )
 
-from .cryptographic_memory import (
-    CryptographicMemorySystem,
-    MemoryPrivacyLevel,
-    CryptographicVideoMemory
+from overlay.avatar.personality import (  # noqa: F401
+    AvatarPersonality,
+    Gender,  # Legacy name (prefer UserGender from emergence)
+    Memory,
+    ConversationTurn,
+)
+
+from overlay.avatar.memory import (  # noqa: F401
+    AvatarMemory,
 )
 
 __all__ = [
-    'AvatarPersonality',
-    'Gender',
-    'AvatarArchetype',
-    'Memory',
-    'ConversationTurn',
-    'CryptographicMemorySystem',
-    'MemoryPrivacyLevel',
-    'CryptographicVideoMemory'
+    # Emergence
+    "AvatarCore",
+    "UserGender",
+    "AvatarGender",
+    "AvatarArchetype",
+    # Personality
+    "AvatarPersonality",
+    "Gender",  # Legacy (prefer UserGender)
+    "Memory",
+    "ConversationTurn",
+    # Memory
+    "AvatarMemory",
 ]
