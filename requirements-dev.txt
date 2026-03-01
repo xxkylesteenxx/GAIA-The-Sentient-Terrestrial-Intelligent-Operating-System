@@ -1,0 +1,31 @@
+# GAIA Development Dependencies
+# Generated: 2026-02-28
+#
+# Install development environment:
+#   pip install -r requirements.txt -r requirements-dev.txt
+#
+# These tools are used by CI/CD (.github/workflows/ci.yml)
+# but are not required for production deployment.
+
+# ===========================================================================
+# Testing Framework
+# ===========================================================================
+
+pytest>=7.4.0              # Test framework
+pytest-asyncio>=0.21.0     # Async test support (for WebSocket tests)
+pytest-cov>=4.1.0          # Coverage reporting (codecov integration)
+
+# ===========================================================================
+# Code Quality Tools
+# ===========================================================================
+
+black~=23.0                # Code formatter (PEP 8)
+flake8~=6.0                # Linter, style checker
+mypy~=1.5                  # Static type checker
+
+# ===========================================================================
+# Development Utilities
+# ===========================================================================
+
+ipython>=8.10.0            # Enhanced Python REPL
+ipdb>=0.13.0               # IPython debugger (breakpoint())
